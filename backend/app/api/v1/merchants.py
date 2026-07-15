@@ -79,6 +79,15 @@ def issue_live_keys(
     service = MerchantService(db)
     return service.issue_live_keys_if_approved(merchant_id)
 
+@router.post("/me/test-keys/regenerate", response_model=list[ApiKeyCreatedResponse])
+def regenerate_test_keys(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    merchant_id = _require_merchant_id(current_user)
+    service = MerchantService(db)
+    return service.regenerate_test_keys(merchant_id)
+
 
 @router.get("/me/api-keys", response_model=list[ApiKeyResponse])
 def list_api_keys(

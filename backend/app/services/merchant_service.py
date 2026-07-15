@@ -14,7 +14,7 @@ from app.models.merchant import ApiKeyType, KycStatus
 from app.repositories.identity_repository import IdentityRepository
 from app.repositories.merchant_repository import MerchantRepository
 from app.schemas.merchant import MerchantCreateRequest, SettlementDetailsRequest, ApiKeyCreatedResponse
-
+from app.models.merchant import ApiKeyType, KycStatus
 
 class MerchantService:
     def __init__(self, db: Session):
@@ -76,6 +76,16 @@ class MerchantService:
         created = []
         created.append(self._issue_key_pair(merchant.id, live=True))
         return created
+    
+    def regenerate_test_keys(self, merchant_id: uuid.UUID) -> list[ApiKeyCreatedResponse]:
+        merchant = self.get_merchant(merchant_id)
+        existing_keys = self.repo.list_api_keys(merchant_id)
+
+        for key in existing_keys:
+            if key.key_type in (ApiKeyType.TEST_PUBLIC, ApiKeyType.TEST_SECRET) and key.is_active:
+                self.repo.revoke_api_key(key)
+
+        return self._issue_key_pair(merchant.id, live=False)
 
     def list_api_keys(self, merchant_id: uuid.UUID):
         return self.repo.list_api_keys(merchant_id)
