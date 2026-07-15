@@ -11,6 +11,7 @@ from app.models.payment import PaymentIntentStatus
 from app.repositories.payment_repository import PaymentRepository
 from app.services.processor_adapter import get_processor_adapter, AuthorizationOutcome
 from app.schemas.payment import TokenizeCardRequest, PaymentIntentCreateRequest
+from app.services.ledger_service import LedgerService
 
 
 class PaymentService:
@@ -83,6 +84,13 @@ class PaymentService:
 
         if result.outcome == AuthorizationOutcome.APPROVED:
             intent = self.repo.update_status(intent, PaymentIntentStatus.SUCCEEDED)
+            # Only a genuinely successful payment gets posted to the ledger
+            self.ledger_service.record_successful_payment(
+                merchant_id=merchant_id,
+                payment_intent_id=intent.id,
+                amount_minor=intent.amount_minor,
+                currency=intent.currency,
+            )
         elif result.outcome == AuthorizationOutcome.DECLINED:
             intent = self.repo.update_status(intent, PaymentIntentStatus.DECLINED, failure_reason=result.failure_reason)
         else:  # TIMEOUT

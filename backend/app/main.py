@@ -10,10 +10,8 @@ from sqlalchemy import text
 from app.core.database import engine
 from app.core.redis import redis_client
 from app.core.config import settings
-from app.api.v1 import auth, merchants, payments
-
-# Import models so SQLAlchemy/Alembic register them against Base.metadata
-from app.models import identity, merchant, payment  # noqa: F401
+from app.api.v1 import auth, merchants, payments, wallet
+from app.models import identity, merchant, payment, ledger  # noqa: F401
 
 app = FastAPI(title=settings.APP_NAME)
 
@@ -28,6 +26,10 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(merchants.router)
 app.include_router(payments.router)
+app.include_router(auth.router)
+app.include_router(merchants.router)
+app.include_router(payments.router)
+app.include_router(wallet.router)
 
 
 @app.get("/healthz")
