@@ -5,7 +5,7 @@ authenticated with the merchant's secret API key, not the dashboard JWT.
 
 import uuid
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Request
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -18,6 +18,7 @@ from app.schemas.payment import (
     PaymentIntentConfirmRequest,
     PaymentIntentResponse,
 )
+
 
 router = APIRouter(prefix="/api/v1/payments", tags=["payments"])
 
@@ -65,8 +66,17 @@ def list_payment_intents(
 def confirm_payment_intent(
     intent_id: uuid.UUID,
     payload: PaymentIntentConfirmRequest,
+    request: Request,
     auth: AuthenticatedMerchant = Depends(get_merchant_from_api_key),
     db: Session = Depends(get_db),
 ):
     service = PaymentService(db)
-    return service.confirm_intent(auth.merchant.id, intent_id, payload.payment_method_id)
+    client_ip = request.client.host if request.client else None
+    return service.confirm_intent(
+        auth.merchant.id,
+        intent_id,
+        payload.payment_method_id,
+        device_fingerprint=payload.device_fingerprint,
+        billing_country=payload.billing_country,
+        ip_address=client_ip,
+    )

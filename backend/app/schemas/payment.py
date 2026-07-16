@@ -47,6 +47,8 @@ class PaymentIntentCreateRequest(BaseModel):
 
 class PaymentIntentConfirmRequest(BaseModel):
     payment_method_id: uuid.UUID
+    device_fingerprint: str | None = None
+    billing_country: str | None = None
 
 
 class PaymentIntentResponse(BaseModel):
