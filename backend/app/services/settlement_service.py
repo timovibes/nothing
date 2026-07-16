@@ -12,6 +12,9 @@ from app.models.ledger import LedgerAccountType, LedgerEntryDirection, LedgerEnt
 from app.repositories.settlement_repository import SettlementRepository
 from app.repositories.ledger_repository import LedgerRepository
 from app.services.webhook_service import WebhookService
+from app.services.notification_service import NotificationService, build_payout_paid
+from app.models.notification import NotificationType
+from app.repositories.merchant_repository import MerchantRepository
 
 SETTLEMENT_DELAY_DAYS = 2
 
@@ -22,6 +25,8 @@ class SettlementService:
         self.repo = SettlementRepository(db)
         self.ledger_repo = LedgerRepository(db)
         self.webhook_service = WebhookService(db)
+        self.notification_service = NotificationService(db)
+        self.merchant_repo = MerchantRepository(db)
 
     def sweep_all_merchant_balances(self) -> list[dict]:
         """
@@ -92,6 +97,7 @@ class SettlementService:
             self.repo.mark_paid(payout)
             paid_ids.append(payout.id)
             self.db.commit()
+
             self.webhook_service.emit_event(
                 payout.merchant_id,
                 "payout.paid",
@@ -101,6 +107,17 @@ class SettlementService:
                     "currency": payout.currency,
                 },
             )
+
+            merchant = self.merchant_repo.get_by_id(payout.merchant_id)
+            if merchant and merchant.business_email:
+                subject, body = build_payout_paid(payout.amount_minor, payout.currency)
+                self.notification_service.send_notification(
+                    merchant_id=payout.merchant_id,
+                    notification_type=NotificationType.PAYOUT_PAID,
+                    recipient_email=merchant.business_email,
+                    subject=subject,
+                    body=body,
+                )
 
         return paid_ids
 

@@ -79,3 +79,5 @@ class PaymentIntent(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     payment_method = relationship("PaymentMethod")
+    merchant = relationship("Merchant")
+    customer = relationship("Customer")

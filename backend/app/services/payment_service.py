@@ -13,6 +13,8 @@ from app.services.processor_adapter import get_processor_adapter, AuthorizationO
 from app.schemas.payment import TokenizeCardRequest, PaymentIntentCreateRequest
 from app.services.ledger_service import LedgerService
 from app.services.webhook_service import WebhookService
+from app.services.notification_service import NotificationService, build_payment_receipt, build_payment_declined
+from app.models.notification import NotificationType
 
 
 class PaymentService:
@@ -22,6 +24,7 @@ class PaymentService:
         self.processor = get_processor_adapter()
         self.ledger_service = LedgerService(db)
         self.webhook_service = WebhookService(db)
+        self.notification_service = NotificationService(db)
 
     def tokenize_card(self, merchant_id: uuid.UUID, payload: TokenizeCardRequest):
         result = self.processor.tokenize_card(
@@ -91,6 +94,9 @@ class PaymentService:
             "currency": intent.currency,
         }
 
+        # Merchant's own business_email is the notification fallback when there's no customer on file
+        merchant_email = intent.merchant.business_email if hasattr(intent, "merchant") else None
+
         if result.outcome == AuthorizationOutcome.APPROVED:
             intent = self.repo.update_status(intent, PaymentIntentStatus.SUCCEEDED)
             self.ledger_service.record_successful_payment(
@@ -100,10 +106,34 @@ class PaymentService:
                 currency=intent.currency,
             )
             self.webhook_service.emit_event(merchant_id, "payment_intent.succeeded", event_payload)
+
+            recipient = (intent.customer.email if intent.customer_id and intent.customer and intent.customer.email else merchant_email)
+            if recipient:
+                subject, body = build_payment_receipt(intent.amount_minor, intent.currency, intent.description)
+                self.notification_service.send_notification(
+                    merchant_id=merchant_id,
+                    notification_type=NotificationType.PAYMENT_RECEIPT,
+                    recipient_email=recipient,
+                    subject=subject,
+                    body=body,
+                    customer_id=intent.customer_id,
+                )
         elif result.outcome == AuthorizationOutcome.DECLINED:
             intent = self.repo.update_status(intent, PaymentIntentStatus.DECLINED, failure_reason=result.failure_reason)
             event_payload["failure_reason"] = result.failure_reason
             self.webhook_service.emit_event(merchant_id, "payment_intent.declined", event_payload)
+
+            recipient = (intent.customer.email if intent.customer_id and intent.customer and intent.customer.email else merchant_email)
+            if recipient:
+                subject, body = build_payment_declined(intent.amount_minor, intent.currency, result.failure_reason)
+                self.notification_service.send_notification(
+                    merchant_id=merchant_id,
+                    notification_type=NotificationType.PAYMENT_DECLINED,
+                    recipient_email=recipient,
+                    subject=subject,
+                    body=body,
+                    customer_id=intent.customer_id,
+                )
         else:  # TIMEOUT
             intent = self.repo.update_status(intent, PaymentIntentStatus.PROCESSING, failure_reason=result.failure_reason)
 

@@ -4,10 +4,10 @@ from celery.schedules import crontab
 from app.core.config import settings
 
 celery_app = Celery(
-    "payflow",
+    "nothing",
     broker=settings.REDIS_URL,
     backend=settings.REDIS_URL,
-    include=["app.workers.settlement_tasks", "app.workers.webhook_tasks"],
+    include=["app.workers.settlement_tasks", "app.workers.webhook_tasks", "app.workers.notification_tasks"],
 )
 
 celery_app.conf.update(

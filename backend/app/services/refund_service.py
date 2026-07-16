@@ -16,6 +16,8 @@ from app.repositories.refund_repository import RefundRepository
 from app.repositories.ledger_repository import LedgerRepository
 from app.schemas.refund import RefundCreateRequest
 from app.services.webhook_service import WebhookService
+from app.services.notification_service import NotificationService, build_refund_confirmation
+from app.models.notification import NotificationType
 
 
 class RefundService:
@@ -25,6 +27,8 @@ class RefundService:
         self.refund_repo = RefundRepository(db)
         self.ledger_repo = LedgerRepository(db)
         self.webhook_service = WebhookService(db)
+        self.notification_service = NotificationService(db)
+    
     def create_refund(self, merchant_id: uuid.UUID, payment_intent_id: uuid.UUID, payload: RefundCreateRequest):
         intent = self.payment_repo.get_payment_intent(merchant_id, payment_intent_id)
         if intent is None:
@@ -105,6 +109,18 @@ class RefundService:
                 "currency": intent.currency,
             },
         )
+
+        recipient = intent.customer.email if intent.customer_id and intent.customer and intent.customer.email else intent.merchant.business_email
+        if recipient:
+            subject, body = build_refund_confirmation(refund_amount, intent.currency)
+            self.notification_service.send_notification(
+                merchant_id=merchant_id,
+                notification_type=NotificationType.REFUND_CONFIRMATION,
+                recipient_email=recipient,
+                subject=subject,
+                body=body,
+                customer_id=intent.customer_id,
+            )
 
         return refund
 

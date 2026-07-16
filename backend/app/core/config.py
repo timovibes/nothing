@@ -22,5 +22,12 @@ class Settings(BaseSettings):
 
     API_KEY_PEPPER: str
 
+    SMTP_HOST: str
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str
+    SMTP_PASSWORD: str
+    SMTP_FROM_EMAIL: str
+    SMTP_FROM_NAME: str = "nothing"
+
 
 settings = Settings()
