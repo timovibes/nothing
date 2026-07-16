@@ -15,6 +15,7 @@ from app.repositories.payment_repository import PaymentRepository
 from app.repositories.refund_repository import RefundRepository
 from app.repositories.ledger_repository import LedgerRepository
 from app.schemas.refund import RefundCreateRequest
+from app.services.webhook_service import WebhookService
 
 
 class RefundService:
@@ -23,7 +24,7 @@ class RefundService:
         self.payment_repo = PaymentRepository(db)
         self.refund_repo = RefundRepository(db)
         self.ledger_repo = LedgerRepository(db)
-
+        self.webhook_service = WebhookService(db)
     def create_refund(self, merchant_id: uuid.UUID, payment_intent_id: uuid.UUID, payload: RefundCreateRequest):
         intent = self.payment_repo.get_payment_intent(merchant_id, payment_intent_id)
         if intent is None:
@@ -90,9 +91,21 @@ class RefundService:
 
         # This can legitimately go negative — that's intentional, see comment above
         self.ledger_repo.debit_wallet_for_refund(merchant_id, intent.currency, refund_amount)
-        
+
         self.db.commit()
         self.db.refresh(refund)
+
+        self.webhook_service.emit_event(
+            merchant_id,
+            "payment_intent.refunded",
+            {
+                "payment_intent_id": str(payment_intent_id),
+                "refund_id": str(refund.id),
+                "amount_minor": refund_amount,
+                "currency": intent.currency,
+            },
+        )
+
         return refund
 
     def list_refunds_for_intent(self, merchant_id: uuid.UUID, payment_intent_id: uuid.UUID):

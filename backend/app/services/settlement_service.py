@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from app.models.ledger import LedgerAccountType, LedgerEntryDirection, LedgerEntryType
 from app.repositories.settlement_repository import SettlementRepository
 from app.repositories.ledger_repository import LedgerRepository
+from app.services.webhook_service import WebhookService
 
 SETTLEMENT_DELAY_DAYS = 2
 
@@ -20,6 +21,7 @@ class SettlementService:
         self.db = db
         self.repo = SettlementRepository(db)
         self.ledger_repo = LedgerRepository(db)
+        self.webhook_service = WebhookService(db)
 
     def sweep_all_merchant_balances(self) -> list[dict]:
         """
@@ -83,20 +85,23 @@ class SettlementService:
         return results
 
     def process_due_payouts(self, ignore_date_check: bool = False) -> list[uuid.UUID]:
-        """
-        Flips any in_transit payout whose T+2 window has elapsed to 'paid'.
-        ignore_date_check=True is for local testing only — it processes every
-        in_transit payout immediately regardless of the real T+2 wait, so we
-        don't have to sit around for 2 days to prove the transition works.
-        """
         due_payouts = self.repo.get_due_in_transit_payouts(ignore_date_check=ignore_date_check)
         paid_ids = []
 
         for payout in due_payouts:
             self.repo.mark_paid(payout)
             paid_ids.append(payout.id)
+            self.db.commit()
+            self.webhook_service.emit_event(
+                payout.merchant_id,
+                "payout.paid",
+                {
+                    "payout_id": str(payout.id),
+                    "amount_minor": payout.amount_minor,
+                    "currency": payout.currency,
+                },
+            )
 
-        self.db.commit()
         return paid_ids
 
     def list_payouts_for_merchant(self, merchant_id: uuid.UUID):

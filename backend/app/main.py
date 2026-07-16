@@ -10,8 +10,8 @@ from sqlalchemy import text
 from app.core.database import engine
 from app.core.redis import redis_client
 from app.core.config import settings
-from app.api.v1 import auth, merchants, payments, wallet, settlements, refunds, customers
-from app.models import identity, merchant, payment, ledger, settlement, refund  # noqa: F401
+from app.api.v1 import auth, merchants, payments, wallet, settlements, refunds, customers, webhooks
+from app.models import identity, merchant, payment, ledger, settlement, refund, webhook  # noqa: F401
 
 app = FastAPI(title=settings.APP_NAME)
 
@@ -30,6 +30,7 @@ app.include_router(payments.router)
 app.include_router(wallet.router)
 app.include_router(settlements.router)
 app.include_router(refunds.router)
+app.include_router(webhooks.router)
 
 
 @app.get("/healthz")

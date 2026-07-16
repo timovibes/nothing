@@ -12,6 +12,7 @@ from app.repositories.payment_repository import PaymentRepository
 from app.services.processor_adapter import get_processor_adapter, AuthorizationOutcome
 from app.schemas.payment import TokenizeCardRequest, PaymentIntentCreateRequest
 from app.services.ledger_service import LedgerService
+from app.services.webhook_service import WebhookService
 
 
 class PaymentService:
@@ -20,6 +21,7 @@ class PaymentService:
         self.repo = PaymentRepository(db)
         self.processor = get_processor_adapter()
         self.ledger_service = LedgerService(db)
+        self.webhook_service = WebhookService(db)
 
     def tokenize_card(self, merchant_id: uuid.UUID, payload: TokenizeCardRequest):
         result = self.processor.tokenize_card(
@@ -75,7 +77,6 @@ class PaymentService:
         if payment_method is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment method not found")
 
-        # Mark as processing before calling out to the processor
         intent = self.repo.update_status(intent, PaymentIntentStatus.PROCESSING, payment_method_id=payment_method.id)
 
         result = self.processor.authorize(
@@ -84,17 +85,25 @@ class PaymentService:
             payment_method_token=payment_method.token,
         )
 
+        event_payload = {
+            "payment_intent_id": str(intent.id),
+            "amount_minor": intent.amount_minor,
+            "currency": intent.currency,
+        }
+
         if result.outcome == AuthorizationOutcome.APPROVED:
             intent = self.repo.update_status(intent, PaymentIntentStatus.SUCCEEDED)
-            # Only a genuinely successful payment gets posted to the ledger
             self.ledger_service.record_successful_payment(
                 merchant_id=merchant_id,
                 payment_intent_id=intent.id,
                 amount_minor=intent.amount_minor,
                 currency=intent.currency,
             )
+            self.webhook_service.emit_event(merchant_id, "payment_intent.succeeded", event_payload)
         elif result.outcome == AuthorizationOutcome.DECLINED:
             intent = self.repo.update_status(intent, PaymentIntentStatus.DECLINED, failure_reason=result.failure_reason)
+            event_payload["failure_reason"] = result.failure_reason
+            self.webhook_service.emit_event(merchant_id, "payment_intent.declined", event_payload)
         else:  # TIMEOUT
             intent = self.repo.update_status(intent, PaymentIntentStatus.PROCESSING, failure_reason=result.failure_reason)
 
