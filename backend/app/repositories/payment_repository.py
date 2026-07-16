@@ -57,9 +57,11 @@ class PaymentRepository:
         description: str | None,
         idempotency_key: str | None,
         is_live_mode: str,
+        customer_id: uuid.UUID | None = None,
     ) -> PaymentIntent:
         intent = PaymentIntent(
             merchant_id=merchant_id,
+            customer_id=customer_id,
             amount_minor=amount_minor,
             currency=currency,
             description=description,

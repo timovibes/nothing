@@ -38,6 +38,7 @@ class PaymentMethod(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     merchant_id = Column(UUID(as_uuid=True), ForeignKey("merchants.id"), nullable=False, index=True)
+    customer_id = Column(UUID(as_uuid=True), ForeignKey("customers.id"), nullable=True, index=True)
 
     type = Column(Enum(PaymentMethodType), nullable=False, default=PaymentMethodType.CARD)
 
@@ -57,6 +58,7 @@ class PaymentIntent(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     merchant_id = Column(UUID(as_uuid=True), ForeignKey("merchants.id"), nullable=False, index=True)
+    customer_id = Column(UUID(as_uuid=True), ForeignKey("customers.id"), nullable=True, index=True)
     payment_method_id = Column(UUID(as_uuid=True), ForeignKey("payment_methods.id"), nullable=True)
 
     # Stored in the smallest currency unit (cents) to avoid float rounding errors — 150000 = KES 1,500.00

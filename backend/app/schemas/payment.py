@@ -40,6 +40,7 @@ class PaymentMethodResponse(BaseModel):
 class PaymentIntentCreateRequest(BaseModel):
     amount_minor: int = Field(gt=0, description="Amount in smallest currency unit, e.g. cents")
     currency: str = Field(min_length=3, max_length=3)
+    customer_id: uuid.UUID | None = None
     description: str | None = Field(default=None, max_length=500)
     idempotency_key: str | None = Field(default=None, max_length=255)
 
@@ -50,6 +51,7 @@ class PaymentIntentConfirmRequest(BaseModel):
 
 class PaymentIntentResponse(BaseModel):
     id: uuid.UUID
+    customer_id: uuid.UUID | None
     amount_minor: int
     currency: str
     status: PaymentIntentStatus

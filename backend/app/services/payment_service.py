@@ -50,6 +50,7 @@ class PaymentService:
             description=payload.description,
             idempotency_key=payload.idempotency_key,
             is_live_mode="live" if is_live_mode else "test",
+            customer_id=payload.customer_id,
         )
 
     def get_intent(self, merchant_id: uuid.UUID, intent_id: uuid.UUID):
