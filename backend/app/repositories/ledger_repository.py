@@ -63,6 +63,12 @@ class LedgerRepository:
         wallet.total_settled_minor += amount_minor
         self.db.add(wallet)
         return wallet
+    
+    def debit_wallet_for_refund(self, merchant_id: uuid.UUID, currency: str, amount_minor: int) -> WalletBalance:
+        wallet = self.get_or_create_wallet(merchant_id, currency)
+        wallet.available_balance_minor -= amount_minor
+        self.db.add(wallet)
+        return wallet
 
     def get_entries_for_transaction(self, transaction_group_id: uuid.UUID) -> list[LedgerEntry]:
         return self.db.query(LedgerEntry).filter(LedgerEntry.transaction_group_id == transaction_group_id).all()
