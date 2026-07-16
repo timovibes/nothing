@@ -77,7 +77,7 @@ class LedgerService:
             entry_type=LedgerEntryType.PAYMENT_SETTLEMENT,
             merchant_id=merchant_id,
             reference_id=payment_intent_id,
-            description=f"Platform fee ({FEE_PERCENTAGE * 100}% + {FEE_FIXED_MINOR} minor units flat)",
+            description=f"Platform fee ({FEE_PERCENTAGE * 100:.1f}% + {FEE_FIXED_MINOR} minor units flat)",
         )
 
         # Balance check — total debits must equal total credits before we ever commit

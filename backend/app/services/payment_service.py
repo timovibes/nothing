@@ -19,6 +19,7 @@ class PaymentService:
         self.db = db
         self.repo = PaymentRepository(db)
         self.processor = get_processor_adapter()
+        self.ledger_service = LedgerService(db)
 
     def tokenize_card(self, merchant_id: uuid.UUID, payload: TokenizeCardRequest):
         result = self.processor.tokenize_card(
