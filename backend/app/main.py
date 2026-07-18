@@ -1,8 +1,3 @@
-"""
-FastAPI app entrypoint with CORS and two health-check
-endpoints so we can prove Postgres and Redis are both reachable before
-building anything else on top."""
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
@@ -10,8 +5,11 @@ from sqlalchemy import text
 from app.core.database import engine
 from app.core.redis import redis_client
 from app.core.config import settings
-from app.api.v1 import auth, merchants, payments, wallet, settlements, refunds, customers, webhooks, notifications, fraud
-from app.models import identity, merchant, payment, ledger, settlement, refund, webhook, notification, fraud as fraud_model  # noqa: F401
+from app.core.audit_middleware import AuditMiddleware
+from app.api.v1 import auth, merchants, payments, wallet, settlements, refunds, customers, webhooks, notifications, fraud, audit
+
+# Import models so SQLAlchemy/Alembic register them against Base.metadata
+from app.models import identity, merchant, customer, payment, ledger, settlement, refund, webhook, notification, fraud as fraud_model, audit as audit_model  # noqa: F401
 
 app = FastAPI(title=settings.APP_NAME)
 
@@ -23,6 +21,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_middleware(AuditMiddleware)
+
 app.include_router(auth.router)
 app.include_router(merchants.router)
 app.include_router(customers.router)
@@ -33,6 +33,8 @@ app.include_router(refunds.router)
 app.include_router(webhooks.router)
 app.include_router(notifications.router)
 app.include_router(fraud.router)
+app.include_router(audit.router)
+
 
 @app.get("/healthz")
 def healthz():

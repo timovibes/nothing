@@ -19,12 +19,14 @@ from app.core.config import settings
 from app.repositories.identity_repository import IdentityRepository
 from app.models.identity import UserRole
 from app.schemas.identity import UserRegisterRequest, UserLoginRequest, TokenResponse
+from app.repositories.audit_repository import AuditRepository
 
 
 class AuthService:
     def __init__(self, db: Session):
         self.db = db
         self.repo = IdentityRepository(db)
+        self.audit_repo = AuditRepository(db)
 
     def register(self, payload: UserRegisterRequest):
         existing = self.repo.get_user_by_email(payload.email)
@@ -40,13 +42,29 @@ class AuthService:
         )
         return user
 
-    def login(self, payload: UserLoginRequest) -> TokenResponse:
+    def login(self, payload: UserLoginRequest, ip_address: str | None = None, device: str | None = None) -> TokenResponse:
         user = self.repo.get_user_by_email(payload.email)
+
         if user is None or not verify_password(payload.password, user.hashed_password):
+            self.audit_repo.create_login_session(
+                user_id=user.id if user else None,
+                email_attempted=payload.email,
+                ip_address=ip_address,
+                device=device,
+                success=False,
+            )
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect email or password")
 
         if not user.is_active:
+            self.audit_repo.create_login_session(
+                user_id=user.id, email_attempted=payload.email, ip_address=ip_address, device=device, success=False
+            )
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This account has been deactivated")
+
+        self.audit_repo.create_login_session(
+            user_id=user.id, email_attempted=payload.email, ip_address=ip_address, device=device, success=True
+        )
+        self.audit_repo.create_activity_log(user_id=user.id, activity_type="login")
 
         return self._issue_tokens(user.id, user.role.value, user.merchant_id)
 

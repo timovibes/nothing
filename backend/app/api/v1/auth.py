@@ -1,5 +1,5 @@
 #the actual HTTP routes — /register, /login, /refresh, /logout, and /me
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Request
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -24,9 +24,11 @@ def register(payload: UserRegisterRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(payload: UserLoginRequest, db: Session = Depends(get_db)):
+def login(payload: UserLoginRequest, request: Request, db: Session = Depends(get_db)):
     service = AuthService(db)
-    return service.login(payload)
+    client_ip = request.client.host if request.client else None
+    device = request.headers.get("user-agent")
+    return service.login(payload, ip_address=client_ip, device=device)
 
 
 @router.post("/refresh", response_model=TokenResponse)
@@ -43,5 +45,7 @@ def logout(payload: RefreshRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/me", response_model=UserResponse)
-def me(current_user: User = Depends(get_current_user)):
+def me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    from app.repositories.audit_repository import AuditRepository
+    AuditRepository(db).create_activity_log(user_id=current_user.id, activity_type="viewed_profile")
     return current_user
