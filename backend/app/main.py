@@ -6,7 +6,7 @@ from app.core.database import engine
 from app.core.redis import redis_client
 from app.core.config import settings
 from app.core.audit_middleware import AuditMiddleware
-from app.api.v1 import auth, merchants, payments, wallet, settlements, refunds, customers, webhooks, notifications, fraud, audit, admin
+from app.api.v1 import auth, merchants, payments, wallet, settlements, refunds, customers, webhooks, notifications, fraud, audit, admin, dashboard
 
 # Import models so SQLAlchemy/Alembic register them against Base.metadata
 from app.models import identity, merchant, customer, payment, ledger, settlement, refund, webhook, notification, fraud as fraud_model, audit as audit_model, admin as admin_model  # noqa: F401
@@ -35,6 +35,7 @@ app.include_router(notifications.router)
 app.include_router(fraud.router)
 app.include_router(audit.router)
 app.include_router(admin.router)
+app.include_router(dashboard.router)
 
 
 @app.get("/healthz")
