@@ -1,9 +1,21 @@
-/* Tailwind entrypoint plus global resets — sets the body's default font and background, and
-defines the reusable ledger-tape divider as a real CSS class (our signature element). */
+/* Tailwind v4 entrypoint — our exact locked color tokens and fonts are now defined directly in
+CSS via @theme, replacing the old tailwind.config.js approach entirely. */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #000000;
+  --color-secondary: #919191;
+  --color-tertiary: #919191;
+  --color-error: #FF5449;
+  --color-success: #1E7A46;
+  --color-surface: #FFFFFF;
+  --color-border: rgba(0, 0, 0, 0.08);
+
+  --font-display: "Archivo", sans-serif;
+  --font-body: "IBM Plex Sans", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
 
 body {
   margin: 0;
