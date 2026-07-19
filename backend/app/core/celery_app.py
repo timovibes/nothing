@@ -7,7 +7,7 @@ celery_app = Celery(
     "nothing",
     broker=settings.REDIS_URL,
     backend=settings.REDIS_URL,
-    include=["app.workers.settlement_tasks", "app.workers.webhook_tasks", "app.workers.notification_tasks"],
+    include=["app.workers.settlement_tasks", "app.workers.webhook_tasks", "app.workers.notification_tasks", "app.workers.report_tasks"],
 )
 
 celery_app.conf.update(

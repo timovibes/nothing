@@ -14,6 +14,9 @@ from app.schemas.identity import (
 from app.api.deps import get_current_user
 from app.models.identity import User
 
+from typing import Union
+from app.schemas.identity import OtpRequiredResponse, VerifyOtpRequest
+
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 
@@ -23,12 +26,20 @@ def register(payload: UserRegisterRequest, db: Session = Depends(get_db)):
     return service.register(payload)
 
 
-@router.post("/login", response_model=TokenResponse)
+@router.post("/login", response_model=Union[TokenResponse, OtpRequiredResponse])
 def login(payload: UserLoginRequest, request: Request, db: Session = Depends(get_db)):
     service = AuthService(db)
     client_ip = request.client.host if request.client else None
     device = request.headers.get("user-agent")
     return service.login(payload, ip_address=client_ip, device=device)
+
+
+@router.post("/verify-otp", response_model=TokenResponse)
+def verify_otp(payload: VerifyOtpRequest, request: Request, db: Session = Depends(get_db)):
+    service = AuthService(db)
+    client_ip = request.client.host if request.client else None
+    device = request.headers.get("user-agent")
+    return service.verify_otp(payload, ip_address=client_ip, device=device)
 
 
 @router.post("/refresh", response_model=TokenResponse)

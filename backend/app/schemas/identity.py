@@ -43,3 +43,13 @@ class UserResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class OtpRequiredResponse(BaseModel):
+    otp_required: bool = True
+    otp_session_id: str
+
+
+class VerifyOtpRequest(BaseModel):
+    otp_session_id: str
+    code: str = Field(min_length=6, max_length=6)

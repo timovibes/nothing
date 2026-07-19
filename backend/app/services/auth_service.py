@@ -20,6 +20,16 @@ from app.repositories.identity_repository import IdentityRepository
 from app.models.identity import UserRole
 from app.schemas.identity import UserRegisterRequest, UserLoginRequest, TokenResponse
 from app.repositories.audit_repository import AuditRepository
+import json
+import random
+import secrets
+
+from app.core.redis import redis_client
+from app.services.email_adapter import get_email_adapter
+from app.schemas.identity import OtpRequiredResponse, VerifyOtpRequest
+
+OTP_TTL_SECONDS = 300  # 5 minutes
+OTP_MAX_ATTEMPTS = 5
 
 
 class AuthService:
@@ -27,6 +37,7 @@ class AuthService:
         self.db = db
         self.repo = IdentityRepository(db)
         self.audit_repo = AuditRepository(db)
+        self.email_adapter = get_email_adapter()
 
     def register(self, payload: UserRegisterRequest):
         existing = self.repo.get_user_by_email(payload.email)
@@ -42,7 +53,7 @@ class AuthService:
         )
         return user
 
-    def login(self, payload: UserLoginRequest, ip_address: str | None = None, device: str | None = None) -> TokenResponse:
+    def login(self, payload: UserLoginRequest, ip_address: str | None = None, device: str | None = None):
         user = self.repo.get_user_by_email(payload.email)
 
         if user is None or not verify_password(payload.password, user.hashed_password):
@@ -61,8 +72,62 @@ class AuthService:
             )
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This account has been deactivated")
 
+        # Admins require a second factor before a real session is issued — password alone isn't enough
+        if user.role == UserRole.ADMIN:
+            return self._start_admin_otp_challenge(user)
+
         self.audit_repo.create_login_session(
             user_id=user.id, email_attempted=payload.email, ip_address=ip_address, device=device, success=True
+        )
+        self.audit_repo.create_activity_log(user_id=user.id, activity_type="login")
+
+        return self._issue_tokens(user.id, user.role.value, user.merchant_id)
+
+    def _start_admin_otp_challenge(self, user) -> OtpRequiredResponse:
+        code = f"{random.randint(0, 999999):06d}"
+        otp_session_id = secrets.token_urlsafe(24)
+
+        redis_client.setex(
+            f"admin_otp:{otp_session_id}",
+            OTP_TTL_SECONDS,
+            json.dumps({"user_id": str(user.id), "code": code, "attempts": 0}),
+        )
+
+        self.email_adapter.send(
+            to_email=user.email,
+            subject="Your admin login code",
+            body=f"Your PayFlow admin login code is: {code}\n\nThis code expires in 5 minutes. If you didn't request this, ignore this email.",
+        )
+
+        return OtpRequiredResponse(otp_session_id=otp_session_id)
+
+    def verify_otp(self, payload: VerifyOtpRequest, ip_address: str | None = None, device: str | None = None) -> TokenResponse:
+        redis_key = f"admin_otp:{payload.otp_session_id}"
+        raw = redis_client.get(redis_key)
+
+        if raw is None:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="OTP session expired or invalid — please log in again")
+
+        data = json.loads(raw)
+
+        if data["attempts"] >= OTP_MAX_ATTEMPTS:
+            redis_client.delete(redis_key)
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Too many incorrect attempts — please log in again")
+
+        if payload.code != data["code"]:
+            data["attempts"] += 1
+            redis_client.setex(redis_key, OTP_TTL_SECONDS, json.dumps(data))
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect code")
+
+        redis_client.delete(redis_key)
+
+        user_id = uuid.UUID(data["user_id"])
+        user = self.repo.get_user_by_id(user_id)
+        if user is None or not user.is_active:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User no longer active")
+
+        self.audit_repo.create_login_session(
+            user_id=user.id, email_attempted=user.email, ip_address=ip_address, device=device, success=True
         )
         self.audit_repo.create_activity_log(user_id=user.id, activity_type="login")
 
