@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LoginPage } from "./pages/LoginPage";
+import { OverviewPage } from "./pages/OverviewPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function App() {
@@ -11,7 +12,7 @@ function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <div className="p-8 font-body">Logged in — dashboard coming next.</div>
+              <OverviewPage />
             </ProtectedRoute>
           }
         />
