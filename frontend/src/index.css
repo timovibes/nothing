@@ -2,8 +2,8 @@
 CSS via @theme, replacing the old tailwind.config.js approach entirely. */
 
 @import "tailwindcss";
-/* Use :root for standard CSS custom properties instead of nonstandard @theme */
-:root {
+
+@theme {
   --color-primary: #000000;
   --color-secondary: #919191;
   --color-tertiary: #919191;
