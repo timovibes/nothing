@@ -1,6 +1,3 @@
-// a single configured axios instance pointed at our FastAPI backend, with an interceptor
-// that automatically attaches the dashboard JWT to every request.
-
 import axios from "axios";
 
 export const api = axios.create({
@@ -14,3 +11,15 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
