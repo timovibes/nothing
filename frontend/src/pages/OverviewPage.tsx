@@ -1,13 +1,15 @@
 /* the real dashboard Overview page — fetches live balance and recent payment activity from our
-new JWT endpoints, styled per our locked palette and ledger-tape/stamp design language.*/
+new JWT endpoints, styled per our locked palette and ledger-tape/stamp design language. */
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import { StatusPill } from "../components/StatusPill";
 import { formatMoney, formatDate, shortId } from "../lib/format";
 import type { WalletBalance, PaymentIntent } from "../types";
 
 export function OverviewPage() {
+  const navigate = useNavigate();
   const [balance, setBalance] = useState<WalletBalance | null>(null);
   const [intents, setIntents] = useState<PaymentIntent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,13 +25,17 @@ export function OverviewPage() {
         setBalance(balanceRes.data[0] ?? null);
         setIntents(intentsRes.data);
       } catch (err: any) {
+        if (err.response?.data?.detail === "This user has no merchant account yet") {
+          navigate("/onboarding");
+          return;
+        }
         setError(err.response?.data?.detail ?? "Failed to load dashboard data");
       } finally {
         setLoading(false);
       }
     }
     loadData();
-  }, []);
+  }, [navigate]);
 
   if (loading) {
     return <div className="p-8 font-body text-secondary">Loading…</div>;

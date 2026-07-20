@@ -3,6 +3,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { SignupPage } from "./pages/SignupPage";
 import { VerifyEmailPage } from "./pages/VerifyEmailPage";
 import { OverviewPage } from "./pages/OverviewPage";
+import { OnboardingPage } from "./pages/OnboardingPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function App() {
@@ -12,6 +13,14 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route
+          path="/onboarding"
+          element={
+            <ProtectedRoute>
+              <OnboardingPage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/"
           element={
