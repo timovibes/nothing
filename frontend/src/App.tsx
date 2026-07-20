@@ -4,7 +4,10 @@ import { SignupPage } from "./pages/SignupPage";
 import { VerifyEmailPage } from "./pages/VerifyEmailPage";
 import { OverviewPage } from "./pages/OverviewPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
+import { ApiKeysPage } from "./pages/ApiKeysPage";
+import { StubPage } from "./pages/StubPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { DashboardLayout } from "./components/DashboardLayout";
 
 function App() {
   return (
@@ -25,7 +28,89 @@ function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <OverviewPage />
+              <DashboardLayout>
+                <OverviewPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/api-keys"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <ApiKeysPage />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/payments"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <StubPage title="Payments" />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/refunds"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <StubPage title="Refunds" />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/payouts"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <StubPage title="Payouts" />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customers"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <StubPage title="Customers" />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/webhooks"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <StubPage title="Webhooks" />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/team"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <StubPage title="Team" />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout>
+                <StubPage title="Settings" />
+              </DashboardLayout>
             </ProtectedRoute>
           }
         />

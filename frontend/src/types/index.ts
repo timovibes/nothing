@@ -36,3 +36,20 @@ export interface PaymentIntent {
   created_at: string;
   updated_at: string;
 }
+
+export interface ApiKey {
+  id: string;
+  key_type: "pk_test" | "sk_test" | "pk_live" | "sk_live";
+  display_prefix: string;
+  is_active: boolean;
+  created_at: string;
+  revoked_at: string | null;
+}
+
+export interface ApiKeyCreated {
+  id: string;
+  key_type: "pk_test" | "sk_test" | "pk_live" | "sk_live";
+  display_prefix: string;
+  raw_key: string;
+  created_at: string;
+}

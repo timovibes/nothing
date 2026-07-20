@@ -46,18 +46,7 @@ export function OverviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-surface font-body">
-      {/* Header */}
-      <header className="flex items-center justify-between px-8 py-5 border-b border-border">
-        <span className="font-display font-bold text-lg">nothing</span>
-        <div className="flex items-center gap-4 text-sm">
-          <span className="font-mono text-[11px] uppercase tracking-wider border border-secondary text-secondary px-2 py-0.5">
-            Test mode
-          </span>
-        </div>
-      </header>
-
-      <main className="max-w-3xl mx-auto px-8 py-10">
+    <div className="max-w-3xl">
         {/* Balance */}
         <section>
           <p className="text-xs uppercase tracking-wide text-secondary mb-2">
@@ -111,7 +100,6 @@ export function OverviewPage() {
             </div>
           )}
         </section>
-      </main>
     </div>
   );
 }
