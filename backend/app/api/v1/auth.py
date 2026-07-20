@@ -10,12 +10,12 @@ from app.schemas.identity import (
     RefreshRequest,
     TokenResponse,
     UserResponse,
+    VerifyEmailRequest,
+    ResendVerificationRequest,
 )
 from app.api.deps import get_current_user
 from app.models.identity import User
-
-from typing import Union
-from app.schemas.identity import OtpRequiredResponse, VerifyOtpRequest
+from app.repositories.audit_repository import AuditRepository
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -26,20 +26,26 @@ def register(payload: UserRegisterRequest, db: Session = Depends(get_db)):
     return service.register(payload)
 
 
-@router.post("/login", response_model=Union[TokenResponse, OtpRequiredResponse])
+@router.post("/verify-email", status_code=status.HTTP_204_NO_CONTENT)
+def verify_email(payload: VerifyEmailRequest, db: Session = Depends(get_db)):
+    service = AuthService(db)
+    service.verify_email(payload.email, payload.code)
+    return None
+
+
+@router.post("/resend-verification", status_code=status.HTTP_204_NO_CONTENT)
+def resend_verification(payload: ResendVerificationRequest, db: Session = Depends(get_db)):
+    service = AuthService(db)
+    service.resend_verification_email(payload.email)
+    return None
+
+
+@router.post("/login", response_model=TokenResponse)
 def login(payload: UserLoginRequest, request: Request, db: Session = Depends(get_db)):
     service = AuthService(db)
     client_ip = request.client.host if request.client else None
     device = request.headers.get("user-agent")
     return service.login(payload, ip_address=client_ip, device=device)
-
-
-@router.post("/verify-otp", response_model=TokenResponse)
-def verify_otp(payload: VerifyOtpRequest, request: Request, db: Session = Depends(get_db)):
-    service = AuthService(db)
-    client_ip = request.client.host if request.client else None
-    device = request.headers.get("user-agent")
-    return service.verify_otp(payload, ip_address=client_ip, device=device)
 
 
 @router.post("/refresh", response_model=TokenResponse)
@@ -57,6 +63,5 @@ def logout(payload: RefreshRequest, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=UserResponse)
 def me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    from app.repositories.audit_repository import AuditRepository
     AuditRepository(db).create_activity_log(user_id=current_user.id, activity_type="viewed_profile")
     return current_user

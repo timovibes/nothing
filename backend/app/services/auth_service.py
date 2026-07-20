@@ -1,8 +1,13 @@
 """
-the actual business logic for register/login/refresh/logout like password checks,
-token issuance, and refresh-token rotation.
+The actual business logic for register/login/refresh/logout, plus one-time email
+verification at signup. Admin and regular users log in identically — no 2FA at
+login, per product decision (deviates from the design doc's §6.6, which called
+for mandatory admin OTP-at-login; that requirement was deliberately dropped).
 """
 
+import json
+import random
+import secrets
 import uuid
 
 from fastapi import HTTPException, status
@@ -16,20 +21,15 @@ from app.core.security import (
     hash_refresh_token,
 )
 from app.core.config import settings
+from app.core.redis import redis_client
 from app.repositories.identity_repository import IdentityRepository
+from app.repositories.audit_repository import AuditRepository
 from app.models.identity import UserRole
 from app.schemas.identity import UserRegisterRequest, UserLoginRequest, TokenResponse
-from app.repositories.audit_repository import AuditRepository
-import json
-import random
-import secrets
-
-from app.core.redis import redis_client
 from app.services.email_adapter import get_email_adapter
-from app.schemas.identity import OtpRequiredResponse, VerifyOtpRequest
 
-OTP_TTL_SECONDS = 300  # 5 minutes
-OTP_MAX_ATTEMPTS = 5
+EMAIL_VERIFICATION_TTL_SECONDS = 600  # 10 minutes
+EMAIL_VERIFICATION_MAX_ATTEMPTS = 5
 
 
 class AuthService:
@@ -51,9 +51,12 @@ class AuthService:
             full_name=payload.full_name,
             role=UserRole.MERCHANT_OWNER,
         )
+
+        self._send_verification_email(user.id, user.email)
+
         return user
 
-    def login(self, payload: UserLoginRequest, ip_address: str | None = None, device: str | None = None):
+    def login(self, payload: UserLoginRequest, ip_address: str | None = None, device: str | None = None) -> TokenResponse:
         user = self.repo.get_user_by_email(payload.email)
 
         if user is None or not verify_password(payload.password, user.hashed_password):
@@ -72,62 +75,8 @@ class AuthService:
             )
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This account has been deactivated")
 
-        # Admins require a second factor before a real session is issued — password alone isn't enough
-        if user.role == UserRole.ADMIN:
-            return self._start_admin_otp_challenge(user)
-
         self.audit_repo.create_login_session(
             user_id=user.id, email_attempted=payload.email, ip_address=ip_address, device=device, success=True
-        )
-        self.audit_repo.create_activity_log(user_id=user.id, activity_type="login")
-
-        return self._issue_tokens(user.id, user.role.value, user.merchant_id)
-
-    def _start_admin_otp_challenge(self, user) -> OtpRequiredResponse:
-        code = f"{random.randint(0, 999999):06d}"
-        otp_session_id = secrets.token_urlsafe(24)
-
-        redis_client.setex(
-            f"admin_otp:{otp_session_id}",
-            OTP_TTL_SECONDS,
-            json.dumps({"user_id": str(user.id), "code": code, "attempts": 0}),
-        )
-
-        self.email_adapter.send(
-            to_email=user.email,
-            subject="Your admin login code",
-            body=f"Your PayFlow admin login code is: {code}\n\nThis code expires in 5 minutes. If you didn't request this, ignore this email.",
-        )
-
-        return OtpRequiredResponse(otp_session_id=otp_session_id)
-
-    def verify_otp(self, payload: VerifyOtpRequest, ip_address: str | None = None, device: str | None = None) -> TokenResponse:
-        redis_key = f"admin_otp:{payload.otp_session_id}"
-        raw = redis_client.get(redis_key)
-
-        if raw is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="OTP session expired or invalid — please log in again")
-
-        data = json.loads(raw)
-
-        if data["attempts"] >= OTP_MAX_ATTEMPTS:
-            redis_client.delete(redis_key)
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Too many incorrect attempts — please log in again")
-
-        if payload.code != data["code"]:
-            data["attempts"] += 1
-            redis_client.setex(redis_key, OTP_TTL_SECONDS, json.dumps(data))
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect code")
-
-        redis_client.delete(redis_key)
-
-        user_id = uuid.UUID(data["user_id"])
-        user = self.repo.get_user_by_id(user_id)
-        if user is None or not user.is_active:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User no longer active")
-
-        self.audit_repo.create_login_session(
-            user_id=user.id, email_attempted=user.email, ip_address=ip_address, device=device, success=True
         )
         self.audit_repo.create_activity_log(user_id=user.id, activity_type="login")
 
@@ -140,7 +89,6 @@ class AuthService:
         if token_record is None or not token_record.is_valid():
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token is invalid or expired")
 
-        # Rotate: kill the old token the instant it's used, issue a brand new pair
         self.repo.revoke_refresh_token(token_record)
 
         user = self.repo.get_user_by_id(token_record.user_id)
@@ -154,6 +102,60 @@ class AuthService:
         token_record = self.repo.get_refresh_token(hashed)
         if token_record is not None and token_record.is_valid():
             self.repo.revoke_refresh_token(token_record)
+
+    # --- Email verification (one-time, at signup) ---
+
+    def _send_verification_email(self, user_id: uuid.UUID, email: str) -> None:
+        code = f"{random.randint(0, 999999):06d}"
+        redis_client.setex(
+            f"email_verify:{email.lower()}",
+            EMAIL_VERIFICATION_TTL_SECONDS,
+            json.dumps({"user_id": str(user_id), "code": code, "attempts": 0}),
+        )
+
+        send_result = self.email_adapter.send(
+            to_email=email,
+            subject="Verify your email",
+            body=f"Your verification code is: {code}\n\nThis code expires in 10 minutes.",
+        )
+        if not send_result.success:
+            print(f"[EMAIL VERIFICATION ERROR] Failed to send to {email}: {send_result.error_message}")
+
+    def resend_verification_email(self, email: str) -> None:
+        user = self.repo.get_user_by_email(email)
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No account found with this email")
+        if user.is_email_verified:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email is already verified")
+        self._send_verification_email(user.id, user.email)
+
+    def verify_email(self, email: str, code: str) -> None:
+        redis_key = f"email_verify:{email.lower()}"
+        raw = redis_client.get(redis_key)
+
+        if raw is None:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Verification code expired or not found — request a new one")
+
+        data = json.loads(raw)
+
+        if data["attempts"] >= EMAIL_VERIFICATION_MAX_ATTEMPTS:
+            redis_client.delete(redis_key)
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Too many incorrect attempts — request a new code")
+
+        if code != data["code"]:
+            data["attempts"] += 1
+            redis_client.setex(redis_key, EMAIL_VERIFICATION_TTL_SECONDS, json.dumps(data))
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect code")
+
+        redis_client.delete(redis_key)
+
+        user = self.repo.get_user_by_id(uuid.UUID(data["user_id"]))
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+        user.is_email_verified = True
+        self.db.add(user)
+        self.db.commit()
 
     def _issue_tokens(self, user_id: uuid.UUID, role: str, merchant_id: uuid.UUID | None) -> TokenResponse:
         access_token = create_access_token(subject=str(user_id), role=role, merchant_id=str(merchant_id) if merchant_id else None)
