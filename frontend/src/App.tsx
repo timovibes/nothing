@@ -9,6 +9,7 @@ import { StubPage } from "./pages/StubPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DashboardLayout } from "./components/DashboardLayout";
 import { CheckoutPage } from "./pages/CheckoutPage";
+import { PaymentsPage } from "./pages/PaymentsPage";
 
 function App() {
   return (
@@ -51,7 +52,7 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardLayout>
-                <StubPage title="Payments" />
+                <PaymentsPage />
               </DashboardLayout>
             </ProtectedRoute>
           }

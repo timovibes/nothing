@@ -72,3 +72,13 @@ export interface CheckoutPaymentMethodCreated {
   card_exp_year: number;
   created_at: string;
 }
+
+export interface Refund {
+  id: string;
+  payment_intent_id: string;
+  amount_minor: number;
+  currency: string;
+  status: "succeeded" | "failed";
+  reason: string | null;
+  created_at: string;
+}
