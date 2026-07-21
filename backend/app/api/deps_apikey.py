@@ -50,3 +50,41 @@ def get_merchant_from_api_key(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Live mode is not enabled for this merchant yet")
 
     return AuthenticatedMerchant(merchant=merchant, is_live_mode=is_live)
+
+
+def get_merchant_from_publishable_key(
+    credentials: HTTPAuthorizationCredentials = Depends(api_key_scheme),
+    db: Session = Depends(get_db),
+) -> AuthenticatedMerchant:
+    """
+    Same shape as get_merchant_from_api_key, but for pk_test/pk_live — the key type that's
+    safe to embed in browser JS on the Checkout page. This alone only proves "which merchant,"
+    never "which payment" — routes using this MUST also verify a client_secret against the
+    specific intent being acted on (see checkout.py), or any customer could act on any of a
+    merchant's payment intents.
+    """
+    raw_key = credentials.credentials
+
+    if not (raw_key.startswith("pk_test_") or raw_key.startswith("pk_live_")):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Checkout endpoints require a publishable API key (pk_test_... or pk_live_...)",
+        )
+
+    hashed = hash_api_key(raw_key)
+    repo = MerchantRepository(db)
+    api_key_record = repo.get_active_key_by_hash(hashed)
+
+    if api_key_record is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or revoked API key")
+
+    merchant = repo.get_by_id(api_key_record.merchant_id)
+    if merchant is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Merchant for this API key no longer exists")
+
+    is_live = api_key_record.key_type == ApiKeyType.LIVE_PUBLIC
+
+    if is_live and not merchant.is_live_mode_enabled:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Live mode is not enabled for this merchant yet")
+
+    return AuthenticatedMerchant(merchant=merchant, is_live_mode=is_live)

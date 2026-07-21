@@ -105,3 +105,11 @@ class PaymentRepository:
             .limit(limit)
             .all()
         )
+
+
+    def get_payment_intent_by_client_secret(self, intent_id: uuid.UUID, client_secret: str) -> PaymentIntent | None:
+            return (
+                self.db.query(PaymentIntent)
+                .filter(PaymentIntent.id == intent_id, PaymentIntent.client_secret == client_secret)
+                .first()
+            )

@@ -5,6 +5,7 @@ PaymentMethod (tokenized card, never a raw PAN) and PaymentIntent
 
 import enum
 import uuid
+import secrets
 
 from sqlalchemy import Column, String, Integer, DateTime, Enum, ForeignKey, func
 from sqlalchemy.dialects.postgresql import UUID
@@ -81,3 +82,11 @@ class PaymentIntent(Base):
     payment_method = relationship("PaymentMethod")
     merchant = relationship("Merchant")
     customer = relationship("Customer")
+
+
+    client_secret = Column(
+        String(255),
+        unique=True,
+        nullable=True,  # nullable so existing rows created before this migration don't break
+        default=lambda: f"pi_secret_{secrets.token_urlsafe(24)}",
+    )

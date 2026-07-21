@@ -60,7 +60,24 @@ class PaymentIntentResponse(BaseModel):
     description: str | None
     failure_reason: str | None
     is_live_mode: str
+    client_secret: str | None   # <-- add this. Safe here: only the merchant's own sk_-authenticated
+                                # backend ever sees this response shape, never the browser directly.
     created_at: datetime
     updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+    model_config = {"from_attributes": True}
+
+class PaymentIntentCheckoutResponse(BaseModel):
+    """
+    What the Checkout page is allowed to see about an intent — deliberately excludes
+    merchant_id, idempotency_key, is_live_mode internals, etc.
+    """
+    id: uuid.UUID
+    amount_minor: int
+    currency: str
+    description: str | None
+    status: PaymentIntentStatus
 
     model_config = {"from_attributes": True}

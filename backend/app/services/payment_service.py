@@ -205,3 +205,15 @@ class PaymentService:
 
         payment_method = self.repo.get_payment_method(merchant_id, intent.payment_method_id)
         return self._finalize_authorization(intent, payment_method, merchant_id)
+    
+    def get_intent_for_checkout(self, intent_id: uuid.UUID, client_secret: str, merchant_id: uuid.UUID):
+        """
+        The Checkout-page-safe lookup: requires the exact client_secret for this intent
+        AND that it belongs to the merchant whose pk_ key authenticated the request.
+        Returns a generic 404 either way (never reveal whether the intent exists but the
+        secret was wrong, vs. it not existing at all).
+        """
+        intent = self.repo.get_payment_intent_by_client_secret(intent_id, client_secret)
+        if intent is None or intent.merchant_id != merchant_id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment intent not found")
+        return intent
