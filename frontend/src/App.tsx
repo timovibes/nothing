@@ -8,6 +8,7 @@ import { ApiKeysPage } from "./pages/ApiKeysPage";
 import { StubPage } from "./pages/StubPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DashboardLayout } from "./components/DashboardLayout";
+import { CheckoutPage } from "./pages/CheckoutPage";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/checkout/:intentId" element={<CheckoutPage />} />
         <Route
           path="/onboarding"
           element={

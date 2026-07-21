@@ -53,3 +53,22 @@ export interface ApiKeyCreated {
   raw_key: string;
   created_at: string;
 }
+
+// The deliberately narrow shape the checkout-scoped backend route returns —
+// no merchant_id, no customer_id, no internal fields. See PaymentIntentCheckoutResponse.
+export interface CheckoutIntent {
+  id: string;
+  amount_minor: number;
+  currency: string;
+  description: string | null;
+  status: PaymentIntent["status"];
+}
+
+export interface CheckoutPaymentMethodCreated {
+  id: string;
+  card_brand: string;
+  card_last4: string;
+  card_exp_month: number;
+  card_exp_year: number;
+  created_at: string;
+}
