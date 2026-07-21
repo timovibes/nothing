@@ -129,3 +129,6 @@ class RefundService:
         if intent is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment intent not found")
         return self.refund_repo.list_for_intent(payment_intent_id)
+    
+    def list_refunds_for_merchant(self, merchant_id: uuid.UUID):
+        return self.refund_repo.list_for_merchant(merchant_id)

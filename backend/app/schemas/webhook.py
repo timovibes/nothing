@@ -41,3 +41,26 @@ class WebhookDeliveryResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+class WebhookEndpointDashboardResponse(BaseModel):
+    id: uuid.UUID
+    url: str
+    masked_secret: str
+    subscribed_events: list[str]
+    is_active: str
+    created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+    @classmethod
+    def from_endpoint(cls, endpoint) -> "WebhookEndpointDashboardResponse":
+        secret = endpoint.signing_secret
+        masked = secret[:10] + "…" + secret[-4:] if len(secret) > 14 else "whsec_••••"
+        return cls(
+            id=endpoint.id,
+            url=endpoint.url,
+            masked_secret=masked,
+            subscribed_events=endpoint.subscribed_events,
+            is_active=endpoint.is_active,
+            created_at=endpoint.created_at,
+        )

@@ -51,3 +51,13 @@ class RefundRepository:
             .order_by(Refund.created_at.desc())
             .all()
         )
+   
+
+    def list_for_merchant(self, merchant_id: uuid.UUID, limit: int = 100) -> list[Refund]:
+        return (
+            self.db.query(Refund)
+            .filter(Refund.merchant_id == merchant_id)
+            .order_by(Refund.created_at.desc())
+            .limit(limit)
+            .all()
+        )
