@@ -27,6 +27,7 @@ from app.schemas.webhook import WebhookEndpointDashboardResponse, WebhookDeliver
 from app.schemas.refund import RefundCreateRequest
 from app.schemas.customer import CustomerCreateRequest
 from app.services.customer_service import CustomerService
+from app.schemas.webhook import WebhookEndpointCreateRequest, WebhookEndpointResponse
 
 router = APIRouter(prefix="/api/v1/dashboard", tags=["dashboard"])
 
@@ -107,3 +108,14 @@ def create_customer_from_dashboard(
     merchant_id = _require_merchant_id(current_user)
     service = CustomerService(db)
     return service.create_customer(merchant_id, payload)
+
+
+@router.post("/webhook-endpoints", response_model=WebhookEndpointResponse, status_code=201)
+def create_webhook_endpoint(
+    payload: WebhookEndpointCreateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    merchant_id = _require_merchant_id(current_user)
+    service = WebhookService(db)
+    return service.register_endpoint(merchant_id, payload)
