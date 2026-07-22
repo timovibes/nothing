@@ -15,6 +15,14 @@ import { CustomersPage } from "./pages/CustomersPage";
 import { WebhooksPage } from "./pages/WebhooksPage";
 import { PayoutsPage } from "./pages/PayoutsPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { AdminRoute } from "./components/AdminRoute";
+import { AdminLayout } from "./components/AdminLayout";
+import { AdminMerchantsPage } from "./pages/admin/AdminMerchantsPage";
+import { AdminFraudPage } from "./pages/admin/AdminFraudPage";
+import { AdminSettingsPage } from "./pages/admin/AdminSettingsPage";
+import { AdminFeatureFlagsPage } from "./pages/admin/AdminFeatureFlagsPage";
+import { AdminMaintenancePage } from "./pages/admin/AdminMaintenancePage";
+import { AdminReportsPage } from "./pages/admin/AdminReportsPage";
 
 function App() {
   return (
@@ -121,6 +129,30 @@ function App() {
               </DashboardLayout>
             </ProtectedRoute>
           }
+        />
+        <Route
+          path="/admin/merchants"
+          element={<AdminRoute><AdminLayout><AdminMerchantsPage /></AdminLayout></AdminRoute>}
+        />
+        <Route
+          path="/admin/fraud"
+          element={<AdminRoute><AdminLayout><AdminFraudPage /></AdminLayout></AdminRoute>}
+        />
+        <Route
+          path="/admin/settings"
+          element={<AdminRoute><AdminLayout><AdminSettingsPage /></AdminLayout></AdminRoute>}
+        />
+        <Route
+          path="/admin/feature-flags"
+          element={<AdminRoute><AdminLayout><AdminFeatureFlagsPage /></AdminLayout></AdminRoute>}
+        />
+        <Route
+          path="/admin/maintenance"
+          element={<AdminRoute><AdminLayout><AdminMaintenancePage /></AdminLayout></AdminRoute>}
+        />
+        <Route
+          path="/admin/reports"
+          element={<AdminRoute><AdminLayout><AdminReportsPage /></AdminLayout></AdminRoute>}
         />
       </Routes>
     </BrowserRouter>
