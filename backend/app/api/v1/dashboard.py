@@ -24,6 +24,9 @@ from app.services.webhook_service import WebhookService
 from app.schemas.refund import RefundResponse
 from app.schemas.customer import CustomerResponse
 from app.schemas.webhook import WebhookEndpointDashboardResponse, WebhookDeliveryResponse
+from app.schemas.refund import RefundCreateRequest
+from app.schemas.customer import CustomerCreateRequest
+from app.services.customer_service import CustomerService
 
 router = APIRouter(prefix="/api/v1/dashboard", tags=["dashboard"])
 
@@ -83,3 +86,24 @@ def list_webhook_deliveries(current_user: User = Depends(get_current_user), db: 
     merchant_id = _require_merchant_id(current_user)
     service = WebhookService(db)
     return service.list_deliveries(merchant_id)
+
+@router.post("/payment-intents/{intent_id}/refund", response_model=RefundResponse, status_code=201)
+def create_refund_from_dashboard(
+    intent_id: uuid.UUID,
+    payload: RefundCreateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    merchant_id = _require_merchant_id(current_user)
+    service = RefundService(db)
+    return service.create_refund(merchant_id, intent_id, payload)
+
+@router.post("/customers", response_model=CustomerResponse, status_code=201)
+def create_customer_from_dashboard(
+    payload: CustomerCreateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    merchant_id = _require_merchant_id(current_user)
+    service = CustomerService(db)
+    return service.create_customer(merchant_id, payload)

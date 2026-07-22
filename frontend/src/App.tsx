@@ -10,6 +10,8 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DashboardLayout } from "./components/DashboardLayout";
 import { CheckoutPage } from "./pages/CheckoutPage";
 import { PaymentsPage } from "./pages/PaymentsPage";
+import { RefundsPage } from "./pages/RefundsPage";
+import { CustomersPage } from "./pages/CustomersPage";
 
 function App() {
   return (
@@ -62,7 +64,7 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardLayout>
-                <StubPage title="Refunds" />
+                <RefundsPage />
               </DashboardLayout>
             </ProtectedRoute>
           }
@@ -82,7 +84,7 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardLayout>
-                <StubPage title="Customers" />
+                <CustomersPage />
               </DashboardLayout>
             </ProtectedRoute>
           }
