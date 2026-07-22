@@ -25,6 +25,8 @@ from app.schemas.admin import (
     ReportExportResponse,
 )
 from app.schemas.merchant import MerchantResponse
+from app.models.merchant import KycStatus
+from app.repositories.merchant_repository import MerchantRepository
 
 router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
 
@@ -107,3 +109,12 @@ def download_report(report_id: uuid.UUID, admin: User = Depends(require_admin), 
 def public_maintenance_windows(db: Session = Depends(get_db)):
     service = AdminService(db)
     return service.list_status_page_windows()
+
+@router.get("/merchants", response_model=list[MerchantResponse])
+def list_merchants(
+    kyc_status: KycStatus | None = None,
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    repo = MerchantRepository(db)
+    return repo.list_by_kyc_status(kyc_status)

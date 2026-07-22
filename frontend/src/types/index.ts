@@ -105,3 +105,50 @@ export interface LiveApiKeyCreated {
   raw_key: string;
   created_at: string;
 }
+
+export interface FraudCase {
+  id: string;
+  payment_intent_id: string;
+  merchant_id: string;
+  risk_score: number;
+  status: "pending" | "approved" | "rejected";
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+}
+
+export interface SystemSetting {
+  id: string;
+  key: string;
+  value: Record<string, unknown>;
+  description: string | null;
+  updated_at: string;
+}
+
+export interface FeatureFlag {
+  id: string;
+  key: string;
+  merchant_id: string | null;
+  enabled: boolean;
+  description: string | null;
+  created_at: string;
+}
+
+export interface MaintenanceWindow {
+  id: string;
+  title: string;
+  description: string | null;
+  starts_at: string;
+  ends_at: string;
+  created_at: string;
+}
+
+export interface ReportExport {
+  id: string;
+  report_type: string;
+  status: "pending" | "completed" | "failed" | string;
+  file_path: string | null;
+  error_message: string | null;
+  created_at: string;
+  completed_at: string | null;
+}

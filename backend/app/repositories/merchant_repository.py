@@ -67,3 +67,9 @@ class MerchantRepository:
         api_key.revoked_at = datetime.now(timezone.utc)
         self.db.add(api_key)
         self.db.commit()
+
+    def list_by_kyc_status(self, kyc_status: KycStatus | None = None) -> list[Merchant]:
+        query = self.db.query(Merchant)
+        if kyc_status is not None:
+            query = query.filter(Merchant.kyc_status == kyc_status)
+        return query.order_by(Merchant.created_at.desc()).all()
