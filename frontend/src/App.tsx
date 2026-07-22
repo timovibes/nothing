@@ -14,6 +14,7 @@ import { RefundsPage } from "./pages/RefundsPage";
 import { CustomersPage } from "./pages/CustomersPage";
 import { WebhooksPage } from "./pages/WebhooksPage";
 import { PayoutsPage } from "./pages/PayoutsPage";
+import { SettingsPage } from "./pages/SettingsPage";
 
 function App() {
   return (
@@ -116,7 +117,7 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardLayout>
-                <StubPage title="Settings" />
+                <SettingsPage />
               </DashboardLayout>
             </ProtectedRoute>
           }

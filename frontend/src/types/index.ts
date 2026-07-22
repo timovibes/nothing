@@ -82,3 +82,26 @@ export interface Refund {
   reason: string | null;
   created_at: string;
 }
+
+export interface MerchantProfile {
+  id: string;
+  business_name: string;
+  business_email: string;
+  country: string;
+  default_currency: string;
+  kyc_status: "pending" | "under_review" | "approved" | "rejected";
+  kyc_rejection_reason: string | null;
+  settlement_bank_name: string | null;
+  settlement_account_number: string | null;
+  settlement_account_name: string | null;
+  is_live_mode_enabled: boolean;
+  created_at: string;
+}
+
+export interface LiveApiKeyCreated {
+  id: string;
+  key_type: "pk_live" | "sk_live";
+  display_prefix: string;
+  raw_key: string;
+  created_at: string;
+}
