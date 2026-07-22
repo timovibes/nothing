@@ -12,6 +12,8 @@ import { CheckoutPage } from "./pages/CheckoutPage";
 import { PaymentsPage } from "./pages/PaymentsPage";
 import { RefundsPage } from "./pages/RefundsPage";
 import { CustomersPage } from "./pages/CustomersPage";
+import { WebhooksPage } from "./pages/WebhooksPage";
+import { PayoutsPage } from "./pages/PayoutsPage";
 
 function App() {
   return (
@@ -74,7 +76,7 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardLayout>
-                <StubPage title="Payouts" />
+                <PayoutsPage />
               </DashboardLayout>
             </ProtectedRoute>
           }
@@ -94,7 +96,7 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardLayout>
-                <StubPage title="Webhooks" />
+                <WebhooksPage />
               </DashboardLayout>
             </ProtectedRoute>
           }
