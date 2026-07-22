@@ -66,3 +66,41 @@ class IdentityRepository:
             RefreshToken.revoked_at.is_(None),
         ).update({"revoked_at": datetime.now(timezone.utc)})
         self.db.commit()
+
+    def create_staff_invite_user(
+        self, email: str, full_name: str, merchant_id: uuid.UUID, placeholder_hashed_password: str
+    ) -> User:
+        user = User(
+            email=email,
+            hashed_password=placeholder_hashed_password,
+            full_name=full_name,
+            role=UserRole.MERCHANT_STAFF,
+            merchant_id=merchant_id,
+            is_active=False,       # blocked from logging in until they accept the invite
+            is_email_verified=True,  # trusted since the owner supplied the email directly
+        )
+        self.db.add(user)
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    def list_staff_for_merchant(self, merchant_id: uuid.UUID) -> list[User]:
+        return (
+            self.db.query(User)
+            .filter(User.merchant_id == merchant_id, User.role == UserRole.MERCHANT_STAFF)
+            .order_by(User.created_at.desc())
+            .all()
+        )
+
+    def activate_staff_user(self, user: User, hashed_password: str) -> User:
+        user.hashed_password = hashed_password
+        user.is_active = True
+        self.db.add(user)
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
+    def deactivate_user(self, user: User) -> None:
+        user.is_active = False
+        self.db.add(user)
+        self.db.commit()

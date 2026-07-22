@@ -19,6 +19,8 @@ from app.schemas.merchant import (
     ApiKeyCreatedResponse,
     ApiKeyResponse,
 )
+from app.services.team_service import TeamService
+from app.schemas.identity import StaffInviteRequest, StaffMemberResponse
 
 router = APIRouter(prefix="/api/v1/merchants", tags=["merchants"])
 
@@ -108,4 +110,33 @@ def revoke_api_key(
     merchant_id = _require_merchant_id(current_user)
     service = MerchantService(db)
     service.revoke_api_key(merchant_id, api_key_id)
+    return None
+
+@router.post("/me/staff/invite", response_model=StaffMemberResponse, status_code=status.HTTP_201_CREATED)
+def invite_staff(
+    payload: StaffInviteRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = TeamService(db)
+    return service.invite_staff(current_user, payload)
+
+
+@router.get("/me/staff", response_model=list[StaffMemberResponse])
+def list_staff(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = TeamService(db)
+    return service.list_staff(current_user)
+
+
+@router.delete("/me/staff/{staff_user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def remove_staff(
+    staff_user_id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = TeamService(db)
+    service.remove_staff(current_user, staff_user_id)
     return None

@@ -5,7 +5,6 @@ import { VerifyEmailPage } from "./pages/VerifyEmailPage";
 import { OverviewPage } from "./pages/OverviewPage";
 import { OnboardingPage } from "./pages/OnboardingPage";
 import { ApiKeysPage } from "./pages/ApiKeysPage";
-import { StubPage } from "./pages/StubPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { DashboardLayout } from "./components/DashboardLayout";
 import { CheckoutPage } from "./pages/CheckoutPage";
@@ -23,6 +22,8 @@ import { AdminSettingsPage } from "./pages/admin/AdminSettingsPage";
 import { AdminFeatureFlagsPage } from "./pages/admin/AdminFeatureFlagsPage";
 import { AdminMaintenancePage } from "./pages/admin/AdminMaintenancePage";
 import { AdminReportsPage } from "./pages/admin/AdminReportsPage";
+import { TeamPage } from "./pages/TeamPage";
+import { AcceptInvitePage } from "./pages/AcceptInvitePage";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/checkout/:intentId" element={<CheckoutPage />} />
+        <Route path="/accept-invite" element={<AcceptInvitePage />} />
         <Route
           path="/onboarding"
           element={
@@ -115,7 +117,7 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardLayout>
-                <StubPage title="Team" />
+                <TeamPage />
               </DashboardLayout>
             </ProtectedRoute>
           }

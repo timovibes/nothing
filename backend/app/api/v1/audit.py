@@ -12,6 +12,8 @@ from app.api.deps_apikey import get_merchant_from_api_key, AuthenticatedMerchant
 from app.models.identity import User
 from app.repositories.audit_repository import AuditRepository
 from app.schemas.audit import ApiLogResponse, AuditLogResponse, LoginSessionResponse
+from app.schemas.identity import AcceptInviteRequest, StaffMemberResponse
+from app.services.team_service import TeamService
 
 router = APIRouter(prefix="/api/v1/audit", tags=["audit"])
 
@@ -50,3 +52,8 @@ def list_all_audit_logs(
 ):
     repo = AuditRepository(db)
     return repo.list_all_audit_logs()
+
+@router.post("/accept-invite", response_model=StaffMemberResponse)
+def accept_invite(payload: AcceptInviteRequest, db: Session = Depends(get_db)):
+    service = TeamService(db)
+    return service.accept_invite(payload)

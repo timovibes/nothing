@@ -152,3 +152,12 @@ export interface ReportExport {
   created_at: string;
   completed_at: string | null;
 }
+
+export interface StaffMember {
+  id: string;
+  email: string;
+  full_name: string;
+  role: "merchant_owner" | "merchant_staff" | "admin" | "customer";
+  is_active: boolean;
+  created_at: string;
+}
