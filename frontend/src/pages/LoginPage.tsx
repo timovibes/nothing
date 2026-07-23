@@ -1,9 +1,13 @@
-/*the dashboard login screen — calls our real /api/v1/auth/login endpoint, handles both the 
-normal token response and the admin OTP challenge*/
-
+// src/pages/LoginPage.tsx — full replace
+/*
+the dashboard login screen — plain email + password. After a successful login, decodes the
+JWT to check role: admin accounts go straight to the Admin Portal, everyone else lands on
+the normal merchant dashboard.
+*/
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
+import { decodeJwtPayload } from "../lib/jwt";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -16,12 +20,17 @@ export function LoginPage() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-
     try {
       const response = await api.post("/api/v1/auth/login", { email, password });
       localStorage.setItem("access_token", response.data.access_token);
       localStorage.setItem("refresh_token", response.data.refresh_token);
-      navigate("/");
+
+      const payload = decodeJwtPayload(response.data.access_token);
+      if (payload?.role === "admin") {
+        navigate("/admin/merchants");
+      } else {
+        navigate("/");
+      }
     } catch (err: any) {
       setError(err.response?.data?.detail ?? "Something went wrong. Try again.");
     } finally {
@@ -34,7 +43,6 @@ export function LoginPage() {
       <div className="w-full max-w-sm">
         <h1 className="font-display font-bold text-2xl mb-1">nothing</h1>
         <p className="text-secondary text-sm mb-8">Sign in to your dashboard</p>
-
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-xs uppercase tracking-wide text-secondary mb-1">
@@ -69,7 +77,6 @@ export function LoginPage() {
             {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>
-
         <p className="text-sm text-secondary mt-6">
           Don't have an account?{" "}
           <Link to="/signup" className="text-primary underline">

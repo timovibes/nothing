@@ -24,7 +24,7 @@ from app.core.config import settings
 from app.core.redis import redis_client
 from app.repositories.identity_repository import IdentityRepository
 from app.repositories.audit_repository import AuditRepository
-from app.models.identity import UserRole
+from app.models.identity import User, UserRole
 from app.schemas.identity import UserRegisterRequest, UserLoginRequest, TokenResponse
 from app.services.email_adapter import get_email_adapter
 
@@ -169,3 +169,10 @@ class AuthService:
         )
 
         return TokenResponse(access_token=access_token, refresh_token=raw_refresh)
+
+    def change_password(self, user: User, current_password: str, new_password: str) -> None:
+        if not verify_password(current_password, user.hashed_password):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Current password is incorrect")
+        user.hashed_password = hash_password(new_password)
+        self.db.add(user)
+        self.db.commit()

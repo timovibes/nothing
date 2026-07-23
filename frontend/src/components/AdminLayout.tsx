@@ -13,6 +13,7 @@ const ADMIN_NAV_ITEMS = [
   { label: "Feature Flags", path: "/admin/feature-flags" },
   { label: "Maintenance", path: "/admin/maintenance" },
   { label: "Reports", path: "/admin/reports" },
+  { label: "Change Password", path: "/admin/change-password" }
 ];
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {

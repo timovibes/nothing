@@ -16,6 +16,7 @@ from app.schemas.identity import (
 from app.api.deps import get_current_user
 from app.models.identity import User
 from app.repositories.audit_repository import AuditRepository
+from app.schemas.identity import ChangePasswordRequest
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -65,3 +66,13 @@ def logout(payload: RefreshRequest, db: Session = Depends(get_db)):
 def me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     AuditRepository(db).create_activity_log(user_id=current_user.id, activity_type="viewed_profile")
     return current_user
+
+@router.post("/change-password", status_code=status.HTTP_204_NO_CONTENT)
+def change_password(
+    payload: ChangePasswordRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    service = AuthService(db)
+    service.change_password(current_user, payload.current_password, payload.new_password)
+    return None

@@ -24,6 +24,8 @@ import { AdminMaintenancePage } from "./pages/admin/AdminMaintenancePage";
 import { AdminReportsPage } from "./pages/admin/AdminReportsPage";
 import { TeamPage } from "./pages/TeamPage";
 import { AcceptInvitePage } from "./pages/AcceptInvitePage";
+import { AdminChangePasswordPage } from "./pages/admin/AdminChangePasswordPage";
+
 
 function App() {
   return (
@@ -155,6 +157,10 @@ function App() {
         <Route
           path="/admin/reports"
           element={<AdminRoute><AdminLayout><AdminReportsPage /></AdminLayout></AdminRoute>}
+        />
+        <Route
+          path="/admin/change-password"
+          element={<AdminRoute><AdminLayout><AdminChangePasswordPage /></AdminLayout></AdminRoute>}
         />
       </Routes>
     </BrowserRouter>
