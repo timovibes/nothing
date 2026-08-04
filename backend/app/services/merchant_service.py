@@ -73,6 +73,11 @@ class MerchantService:
         if merchant.kyc_status != KycStatus.APPROVED:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Merchant is not KYC-approved for live mode yet")
 
+        existing_keys = self.repo.list_api_keys(merchant_id)
+        for key in existing_keys:
+            if key.key_type in (ApiKeyType.LIVE_PUBLIC, ApiKeyType.LIVE_SECRET) and key.is_active:
+                self.repo.revoke_api_key(key)
+
         return self._issue_key_pair(merchant.id, live=True)
     
     def regenerate_test_keys(self, merchant_id: uuid.UUID) -> list[ApiKeyCreatedResponse]:
