@@ -163,21 +163,25 @@ export function ApiKeysPage() {
         )}
       </div>
 
-      {keys.length > visibleCount && (
-        <button
-          onClick={() => setVisiblePairs((n) => n + 3)}
-          className="flex items-center gap-1 text-xs uppercase tracking-wide text-secondary mt-4"
-        >
-          Show more <ChevronIcon direction="down" />
-        </button>
-      )}
-      {visiblePairs > 3 && keys.length <= visibleCount && (
-        <button
-          onClick={() => setVisiblePairs(3)}
-          className="flex items-center gap-1 text-xs uppercase tracking-wide text-secondary mt-4"
-        >
-          Show less <ChevronIcon direction="up" />
-        </button>
+      {(keys.length > visibleCount || visiblePairs > 3) && (
+        <div className="flex items-center gap-4 mt-4">
+          {keys.length > visibleCount && (
+            <button
+              onClick={() => setVisiblePairs((n) => n + 3)}
+              className="flex items-center gap-1 text-xs uppercase tracking-wide text-secondary"
+            >
+              Show more <ChevronIcon direction="down" />
+            </button>
+          )}
+          {visiblePairs > 3 && (
+            <button
+              onClick={() => setVisiblePairs(3)}
+              className="flex items-center gap-1 text-xs uppercase tracking-wide text-secondary"
+            >
+              Show less <ChevronIcon direction="up" />
+            </button>
+          )}
+        </div>
       )}
 
       <hr className="ledger-divider my-8" />
