@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
+import { ChevronIcon } from "../components/ChevronIcon";
 import type { ApiKey, ApiKeyCreated } from "../types";
 
 export function ApiKeysPage() {
@@ -10,6 +11,10 @@ export function ApiKeysPage() {
   const [visibleKeyIds, setVisibleKeyIds] = useState<Set<string>>(new Set());
   const [copiedKeyIds, setCopiedKeyIds] = useState<Set<string>>(new Set());
   const [regenerating, setRegenerating] = useState(false);
+  const [visiblePairs, setVisiblePairs] = useState(3);
+
+  const KEYS_PER_PAIR = 2;
+  const visibleCount = visiblePairs * KEYS_PER_PAIR;
 
   async function loadKeys() {
     setLoading(true);
@@ -132,7 +137,7 @@ export function ApiKeysPage() {
         {keys.length === 0 ? (
           <p className="text-secondary text-sm">No API keys yet.</p>
         ) : (
-          keys.map((key, index) => (
+          keys.slice(0, visibleCount).map((key, index, slicedKeys) => (
             <div key={key.id}>
               <div className="flex items-center justify-between py-3">
                 <div className="flex items-center gap-4">
@@ -152,11 +157,28 @@ export function ApiKeysPage() {
                   {new Date(key.created_at).toLocaleDateString("en-KE", { month: "short", day: "numeric" })}
                 </span>
               </div>
-              {index < keys.length - 1 && <hr className="ledger-divider" />}
+              {index < slicedKeys.length - 1 && <hr className="ledger-divider" />}
             </div>
           ))
         )}
       </div>
+
+      {keys.length > visibleCount && (
+        <button
+          onClick={() => setVisiblePairs((n) => n + 3)}
+          className="flex items-center gap-1 text-xs uppercase tracking-wide text-secondary mt-4"
+        >
+          Show more <ChevronIcon direction="down" />
+        </button>
+      )}
+      {visiblePairs > 3 && keys.length <= visibleCount && (
+        <button
+          onClick={() => setVisiblePairs(3)}
+          className="flex items-center gap-1 text-xs uppercase tracking-wide text-secondary mt-4"
+        >
+          Show less <ChevronIcon direction="up" />
+        </button>
+      )}
 
       <hr className="ledger-divider my-8" />
 
