@@ -45,6 +45,7 @@ export function SettingsPage() {
   const [liveKeysIssued, setLiveKeysIssued] = useState(false);
   const [revealedLiveKeys, setRevealedLiveKeys] = useState<LiveApiKeyCreated[] | null>(null);
   const [visibleKeyIds, setVisibleKeyIds] = useState<Set<string>>(new Set());
+  const [copiedKeyIds, setCopiedKeyIds] = useState<Set<string>>(new Set());
 
   async function loadMerchant() {
     setLoading(true);
@@ -132,8 +133,16 @@ export function SettingsPage() {
     return `${prefix}${"•".repeat(Math.max(rawKey.length - prefixLen, 8))}`;
   }
 
-  function copyToClipboard(text: string) {
+  function copyToClipboard(id: string, text: string) {
     navigator.clipboard.writeText(text);
+    setCopiedKeyIds((prev) => new Set(prev).add(id));
+    setTimeout(() => {
+      setCopiedKeyIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }, 1500);
   }
 
   if (loading) return <p className="text-secondary text-sm">Loading…</p>;
@@ -295,10 +304,11 @@ export function SettingsPage() {
                           {visible ? "Hide" : "Show"}
                         </button>
                         <button
-                          onClick={() => copyToClipboard(key.raw_key)}
-                          className="text-xs uppercase tracking-wide border border-primary px-2 py-1"
+                          onClick={() => copyToClipboard(key.id, key.raw_key)}
+                          className="text-xs uppercase tracking-wide border border-primary px-2 py-1 w-16 text-center"
+                          style={copiedKeyIds.has(key.id) ? { color: "#1E7A46", borderColor: "#1E7A46" } : undefined}
                         >
-                          Copy
+                          {copiedKeyIds.has(key.id) ? "Copied" : "Copy"}
                         </button>
                       </div>
                     </div>
