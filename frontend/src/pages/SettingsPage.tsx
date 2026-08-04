@@ -7,6 +7,7 @@ the only missing piece; every one of these has been curl-tested already.
 */
 
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import type { MerchantProfile, LiveApiKeyCreated } from "../types";
 
@@ -41,7 +42,9 @@ export function SettingsPage() {
 
   const [issuingLiveKeys, setIssuingLiveKeys] = useState(false);
   const [liveKeysError, setLiveKeysError] = useState<string | null>(null);
+  const [liveKeysIssued, setLiveKeysIssued] = useState(false);
   const [revealedLiveKeys, setRevealedLiveKeys] = useState<LiveApiKeyCreated[] | null>(null);
+  const [visibleKeyIds, setVisibleKeyIds] = useState<Set<string>>(new Set());
 
   async function loadMerchant() {
     setLoading(true);
@@ -98,14 +101,35 @@ export function SettingsPage() {
   async function handleIssueLiveKeys() {
     setIssuingLiveKeys(true);
     setLiveKeysError(null);
+    setLiveKeysIssued(false);
     try {
       const response = await api.post<LiveApiKeyCreated[]>("/api/v1/merchants/me/live-keys");
       setRevealedLiveKeys(response.data);
+      setVisibleKeyIds(new Set());
+      setLiveKeysIssued(true);
     } catch (err: any) {
       setLiveKeysError(err.response?.data?.detail ?? "Failed to issue live keys");
     } finally {
       setIssuingLiveKeys(false);
     }
+  }
+
+  function toggleKeyVisibility(id: string) {
+    setVisibleKeyIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  function maskKey(rawKey: string) {
+    const prefixLen = rawKey.indexOf("_", rawKey.indexOf("_") + 1) + 1; // e.g. "sk_live_"
+    const prefix = rawKey.slice(0, prefixLen);
+    return `${prefix}${"•".repeat(Math.max(rawKey.length - prefixLen, 8))}`;
   }
 
   function copyToClipboard(text: string) {
@@ -244,23 +268,49 @@ export function SettingsPage() {
 
             {revealedLiveKeys && (
               <div className="border border-primary p-4 mb-4">
+                {liveKeysIssued && (
+                  <p className="text-sm mb-3" style={{ color: "#1E7A46" }}>
+                    Live keys issued successfully.
+                  </p>
+                )}
                 <p className="font-mono text-[11px] uppercase tracking-wider text-error mb-3">
                   Save these now — the secret key will not be shown again
                 </p>
-                {revealedLiveKeys.map((key) => (
-                  <div key={key.id} className="flex items-center justify-between py-2 border-t border-border first:border-t-0">
-                    <div>
-                      <p className="text-xs text-secondary uppercase">{key.key_type}</p>
-                      <p className="font-mono text-sm break-all">{key.raw_key}</p>
+                {revealedLiveKeys.map((key) => {
+                  const visible = visibleKeyIds.has(key.id);
+                  return (
+                    <div key={key.id} className="flex items-center justify-between py-2 border-t border-border first:border-t-0">
+                      <div>
+                        <p className="text-xs text-secondary uppercase">{key.key_type}</p>
+                        <p className="font-mono text-sm break-all">
+                          {visible ? key.raw_key : maskKey(key.raw_key)}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0 ml-4">
+                        <button
+                          onClick={() => toggleKeyVisibility(key.id)}
+                          aria-label={visible ? "Hide key" : "Show key"}
+                          className="text-xs uppercase tracking-wide border border-primary px-2 py-1"
+                        >
+                          {visible ? "Hide" : "Show"}
+                        </button>
+                        <button
+                          onClick={() => copyToClipboard(key.raw_key)}
+                          className="text-xs uppercase tracking-wide border border-primary px-2 py-1"
+                        >
+                          Copy
+                        </button>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => copyToClipboard(key.raw_key)}
-                      className="text-xs uppercase tracking-wide border border-primary px-2 py-1 shrink-0 ml-4"
-                    >
-                      Copy
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
+                <p className="text-xs text-secondary mt-3">
+                  You can also find these (masked) on the{" "}
+                  <Link to="/api-keys" className="text-primary underline">
+                    API Keys page
+                  </Link>
+                  .
+                </p>
               </div>
             )}
 

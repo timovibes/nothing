@@ -7,6 +7,7 @@ export function ApiKeysPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [revealedKeys, setRevealedKeys] = useState<ApiKeyCreated[] | null>(null);
+  const [visibleKeyIds, setVisibleKeyIds] = useState<Set<string>>(new Set());
   const [regenerating, setRegenerating] = useState(false);
 
   async function loadKeys() {
@@ -31,6 +32,7 @@ export function ApiKeysPage() {
     try {
       const response = await api.post("/api/v1/merchants/me/test-keys/regenerate");
       setRevealedKeys(response.data);
+      setVisibleKeyIds(new Set());
       await loadKeys();
     } catch (err: any) {
       setError(err.response?.data?.detail ?? "Failed to regenerate keys");
@@ -41,6 +43,24 @@ export function ApiKeysPage() {
 
   function copyToClipboard(text: string) {
     navigator.clipboard.writeText(text);
+  }
+
+  function toggleKeyVisibility(id: string) {
+    setVisibleKeyIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  function maskKey(rawKey: string) {
+    const prefixLen = rawKey.indexOf("_", rawKey.indexOf("_") + 1) + 1; // e.g. "sk_test_"
+    const prefix = rawKey.slice(0, prefixLen);
+    return `${prefix}${"•".repeat(Math.max(rawKey.length - prefixLen, 8))}`;
   }
 
   if (loading) {
@@ -59,20 +79,34 @@ export function ApiKeysPage() {
           <p className="font-mono text-[11px] uppercase tracking-wider text-error mb-3">
             Save these now — the secret key will not be shown again
           </p>
-          {revealedKeys.map((key) => (
-            <div key={key.id} className="flex items-center justify-between py-2 border-t border-border first:border-t-0">
-              <div>
-                <p className="text-xs text-secondary uppercase">{key.key_type}</p>
-                <p className="font-mono text-sm break-all">{key.raw_key}</p>
+          {revealedKeys.map((key) => {
+            const visible = visibleKeyIds.has(key.id);
+            return (
+              <div key={key.id} className="flex items-center justify-between py-2 border-t border-border first:border-t-0">
+                <div>
+                  <p className="text-xs text-secondary uppercase">{key.key_type}</p>
+                  <p className="font-mono text-sm break-all">
+                    {visible ? key.raw_key : maskKey(key.raw_key)}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 ml-4">
+                  <button
+                    onClick={() => toggleKeyVisibility(key.id)}
+                    aria-label={visible ? "Hide key" : "Show key"}
+                    className="text-xs uppercase tracking-wide border border-primary px-2 py-1"
+                  >
+                    {visible ? "Hide" : "Show"}
+                  </button>
+                  <button
+                    onClick={() => copyToClipboard(key.raw_key)}
+                    className="text-xs uppercase tracking-wide border border-primary px-2 py-1"
+                  >
+                    Copy
+                  </button>
+                </div>
               </div>
-              <button
-                onClick={() => copyToClipboard(key.raw_key)}
-                className="text-xs uppercase tracking-wide border border-primary px-2 py-1 shrink-0 ml-4"
-              >
-                Copy
-              </button>
-            </div>
-          ))}
+            );
+          })}
           <button
             onClick={() => setRevealedKeys(null)}
             className="text-xs text-secondary underline mt-3"
