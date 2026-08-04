@@ -36,6 +36,7 @@ export function SettingsPage() {
   const [savingBankDetails, setSavingBankDetails] = useState(false);
   const [bankError, setBankError] = useState<string | null>(null);
   const [bankSaved, setBankSaved] = useState(false);
+  const [editingBankDetails, setEditingBankDetails] = useState(false);
 
   const [submittingKyc, setSubmittingKyc] = useState(false);
   const [kycError, setKycError] = useState<string | null>(null);
@@ -55,6 +56,11 @@ export function SettingsPage() {
       setBankName(response.data.settlement_bank_name ?? "");
       setAccountNumber(response.data.settlement_account_number ?? "");
       setAccountName(response.data.settlement_account_name ?? "");
+      const alreadyHasBankDetails =
+        !!response.data.settlement_bank_name &&
+        !!response.data.settlement_account_number &&
+        !!response.data.settlement_account_name;
+      setEditingBankDetails(!alreadyHasBankDetails);
     } catch (err: any) {
       setError(err.response?.data?.detail ?? "Failed to load merchant profile");
     } finally {
@@ -79,6 +85,8 @@ export function SettingsPage() {
       });
       setMerchant(response.data);
       setBankSaved(true);
+      setEditingBankDetails(false);
+      setTimeout(() => setBankSaved(false), 3000);
     } catch (err: any) {
       setBankError(err.response?.data?.detail ?? "Failed to save settlement details");
     } finally {
@@ -222,47 +230,89 @@ export function SettingsPage() {
         <p className="text-secondary text-sm mb-4">
           Where your available balance is paid out to, automatically, T+2 days after settlement.
         </p>
-        <form onSubmit={handleSaveBankDetails} className="flex flex-col gap-4">
+
+        {bankSaved && (
+          <p className="text-sm mb-4" style={{ color: "#1E7A46" }}>
+            Saved.
+          </p>
+        )}
+
+        {editingBankDetails ? (
+          <form onSubmit={handleSaveBankDetails} className="flex flex-col gap-4">
+            <div>
+              <label className="text-xs uppercase tracking-wide text-secondary block mb-1">Bank name</label>
+              <input
+                type="text"
+                required
+                value={bankName}
+                onChange={(e) => setBankName(e.target.value)}
+                className="w-full border border-border px-3 py-2 text-sm focus:outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wide text-secondary block mb-1">Account number</label>
+              <input
+                type="text"
+                required
+                value={accountNumber}
+                onChange={(e) => setAccountNumber(e.target.value)}
+                className="w-full border border-border px-3 py-2 text-sm font-mono focus:outline-none focus:border-primary"
+              />
+            </div>
+            <div>
+              <label className="text-xs uppercase tracking-wide text-secondary block mb-1">Account name</label>
+              <input
+                type="text"
+                required
+                value={accountName}
+                onChange={(e) => setAccountName(e.target.value)}
+                className="w-full border border-border px-3 py-2 text-sm focus:outline-none focus:border-primary"
+              />
+            </div>
+            {bankError && <p className="text-error text-sm">{bankError}</p>}
+            <div className="flex items-center gap-3">
+              <button
+                type="submit"
+                disabled={savingBankDetails}
+                className="bg-primary text-white px-4 py-2 text-sm font-medium disabled:opacity-50 self-start"
+              >
+                {savingBankDetails ? "Saving…" : "Save bank details"}
+              </button>
+              {hasBankDetails && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBankName(merchant.settlement_bank_name ?? "");
+                    setAccountNumber(merchant.settlement_account_number ?? "");
+                    setAccountName(merchant.settlement_account_name ?? "");
+                    setBankError(null);
+                    setEditingBankDetails(false);
+                  }}
+                  className="text-sm text-secondary underline"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </form>
+        ) : (
           <div>
-            <label className="text-xs uppercase tracking-wide text-secondary block mb-1">Bank name</label>
-            <input
-              type="text"
-              required
-              value={bankName}
-              onChange={(e) => setBankName(e.target.value)}
-              className="w-full border border-border px-3 py-2 text-sm focus:outline-none focus:border-primary"
-            />
+            <div className="grid grid-cols-2 gap-y-2 text-sm mb-4">
+              <span className="text-secondary">Bank name</span>
+              <span>{merchant.settlement_bank_name}</span>
+              <span className="text-secondary">Account number</span>
+              <span className="font-mono">{merchant.settlement_account_number}</span>
+              <span className="text-secondary">Account name</span>
+              <span>{merchant.settlement_account_name}</span>
+            </div>
+            <button
+              onClick={() => setEditingBankDetails(true)}
+              className="border border-primary px-4 py-2 text-sm font-medium"
+            >
+              Edit bank details
+            </button>
           </div>
-          <div>
-            <label className="text-xs uppercase tracking-wide text-secondary block mb-1">Account number</label>
-            <input
-              type="text"
-              required
-              value={accountNumber}
-              onChange={(e) => setAccountNumber(e.target.value)}
-              className="w-full border border-border px-3 py-2 text-sm font-mono focus:outline-none focus:border-primary"
-            />
-          </div>
-          <div>
-            <label className="text-xs uppercase tracking-wide text-secondary block mb-1">Account name</label>
-            <input
-              type="text"
-              required
-              value={accountName}
-              onChange={(e) => setAccountName(e.target.value)}
-              className="w-full border border-border px-3 py-2 text-sm focus:outline-none focus:border-primary"
-            />
-          </div>
-          {bankError && <p className="text-error text-sm">{bankError}</p>}
-          {bankSaved && <p className="text-sm" style={{ color: "#1E7A46" }}>Saved.</p>}
-          <button
-            type="submit"
-            disabled={savingBankDetails}
-            className="bg-primary text-white px-4 py-2 text-sm font-medium disabled:opacity-50 self-start"
-          >
-            {savingBankDetails ? "Saving…" : "Save bank details"}
-          </button>
-        </form>
+        )}
       </section>
 
       {/* Live API keys */}
