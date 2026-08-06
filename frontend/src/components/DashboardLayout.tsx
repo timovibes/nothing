@@ -59,9 +59,9 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
 
       <div className="flex-1 flex flex-col">
         <header className="flex items-center justify-end px-8 py-5 border-b border-border">
-          <span className="font-mono text-[11px] uppercase tracking-wider border border-secondary text-secondary px-2 py-0.5">
+          {/* <span className="font-mono text-[11px] uppercase tracking-wider border border-secondary text-secondary px-2 py-0.5">
             Test mode
-          </span>
+          </span> */}
         </header>
         <main className="flex-1 px-8 py-10">{children}</main>
       </div>
