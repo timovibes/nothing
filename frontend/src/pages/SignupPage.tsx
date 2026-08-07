@@ -37,7 +37,7 @@ export function SignupPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface px-4">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm rounded-neu-lg shadow-neu-raised bg-surface p-8">
         <h1 className="font-display font-bold text-2xl mb-1">nothing</h1>
         <p className="text-secondary text-sm mb-8">Create your account</p>
 
@@ -51,7 +51,7 @@ export function SignupPage() {
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full border border-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full bg-surface px-3 py-2 text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
             />
           </div>
           <div>
@@ -63,7 +63,7 @@ export function SignupPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full bg-surface px-3 py-2 text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
             />
           </div>
           <div>
@@ -77,13 +77,13 @@ export function SignupPage() {
                 minLength={8}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-primary px-3 py-2 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full bg-surface px-3 py-2 pr-10 text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
-                className="absolute inset-y-0 right-0 flex items-center px-3 text-secondary"
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-secondary rounded-neu-sm hover:shadow-neu-raised-sm transition-shadow"
               >
                 <EyeIcon open={showPassword} />
               </button>
@@ -93,7 +93,7 @@ export function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-white py-2 text-sm font-medium disabled:opacity-50"
+            className="w-full bg-primary text-white py-2 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 transition-shadow"
           >
             {loading ? "Creating account…" : "Create account"}
           </button>
