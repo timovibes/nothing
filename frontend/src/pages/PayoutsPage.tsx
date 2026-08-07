@@ -56,7 +56,7 @@ export function PayoutsPage() {
           No payouts yet. Once you have settled balance, the next scheduled sweep will create one.
         </p>
       ) : (
-        <div>
+        <div className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
           {payouts.map((payout, index) => (
             <div key={payout.id}>
               <div className="flex items-center justify-between py-3">
