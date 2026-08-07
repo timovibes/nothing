@@ -87,28 +87,28 @@ export function TeamPage() {
   if (error) return <p className="text-error text-sm">{error}</p>;
 
   return (
-    <div className="max-w-2xl">
-      <div className="flex items-start justify-between mb-8">
+    <div className="max-w-2xl flex flex-col gap-6">
+      <div className="flex items-start justify-between">
         <div>
           <p className="text-xs uppercase tracking-wide text-secondary mb-2">Team</p>
           <p className="text-secondary text-sm">Invite staff to help manage your account.</p>
         </div>
         <button
           onClick={() => setShowForm((v) => !v)}
-          className="bg-primary text-white px-4 py-2 text-sm font-medium shrink-0"
+          className="bg-primary text-white px-4 py-2 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm transition-shadow shrink-0"
         >
           {showForm ? "Cancel" : "Invite staff"}
         </button>
       </div>
 
       {inviteSent && (
-        <p className="text-sm mb-4" style={{ color: "#1E7A46" }}>
+        <p className="text-sm" style={{ color: "#1E7A46" }}>
           Invite sent. They'll receive an email with a link to set their password.
         </p>
       )}
 
       {showForm && (
-        <form onSubmit={handleInvite} className="border border-border p-5 mb-8 flex flex-col gap-4">
+        <form onSubmit={handleInvite} className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6 flex flex-col gap-4">
           <div>
             <label className="text-xs uppercase tracking-wide text-secondary block mb-1">Full name</label>
             <input
@@ -116,7 +116,7 @@ export function TeamPage() {
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full border border-border px-3 py-2 text-sm focus:outline-none focus:border-primary"
+              className="w-full bg-surface px-3 py-2 text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
             />
           </div>
           <div>
@@ -126,14 +126,14 @@ export function TeamPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-border px-3 py-2 text-sm font-mono focus:outline-none focus:border-primary"
+              className="w-full bg-surface px-3 py-2 text-sm font-mono rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
             />
           </div>
           {inviteError && <p className="text-error text-sm">{inviteError}</p>}
           <button
             type="submit"
             disabled={inviting}
-            className="bg-primary text-white px-4 py-2 text-sm font-medium disabled:opacity-50 self-start"
+            className="bg-primary text-white px-4 py-2 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 self-start transition-shadow"
           >
             {inviting ? "Sending…" : "Send invite"}
           </button>
@@ -143,7 +143,7 @@ export function TeamPage() {
       {staff.length === 0 ? (
         <p className="text-secondary text-sm">No staff members yet.</p>
       ) : (
-        <div>
+        <div className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
           {staff.map((member, index) => (
             <div key={member.id}>
               <div className="flex items-center justify-between py-3">
@@ -153,10 +153,10 @@ export function TeamPage() {
                 </div>
                 <div className="flex items-center gap-4">
                   <span
-                    className="font-mono text-[11px] uppercase tracking-wider px-2 py-0.5 border"
+                    className="font-mono text-[11px] uppercase tracking-wider px-3 py-1 rounded-neu-full shadow-neu-raised-sm"
                     style={{
                       color: member.is_active ? "#1E7A46" : "#919191",
-                      borderColor: member.is_active ? "#1E7A46" : "#919191",
+                      backgroundColor: member.is_active ? "#1E7A4614" : "#91919114",
                     }}
                   >
                     {member.is_active ? "active" : "pending"}
@@ -165,7 +165,7 @@ export function TeamPage() {
                   <button
                     onClick={() => handleRemove(member.id)}
                     disabled={removingId === member.id}
-                    className="text-xs uppercase tracking-wide text-error disabled:opacity-50"
+                    className="text-xs uppercase tracking-wide text-error disabled:opacity-50 px-2 py-1 rounded-neu-sm hover:shadow-neu-raised-sm transition-shadow"
                   >
                     Remove
                   </button>
