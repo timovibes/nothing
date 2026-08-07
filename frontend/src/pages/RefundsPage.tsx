@@ -86,8 +86,8 @@ export function RefundsPage() {
   }
 
   return (
-    <div className="max-w-3xl">
-      <div className="flex items-start justify-between mb-8">
+    <div className="max-w-3xl flex flex-col gap-6">
+      <div className="flex items-start justify-between">
         <div>
           <p className="text-xs uppercase tracking-wide text-secondary mb-2">Refunds</p>
           <p className="text-secondary text-sm">
@@ -96,7 +96,7 @@ export function RefundsPage() {
         </div>
         <button
           onClick={() => setShowForm((v) => !v)}
-          className="bg-primary text-white px-4 py-2 text-sm font-medium shrink-0"
+          className="bg-primary text-white px-4 py-2 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm transition-shadow shrink-0"
         >
           {showForm ? "Cancel" : "Issue refund"}
         </button>
@@ -105,7 +105,7 @@ export function RefundsPage() {
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="border border-border p-5 mb-8 flex flex-col gap-4"
+          className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6 flex flex-col gap-4"
         >
           <div>
             <label className="text-xs uppercase tracking-wide text-secondary block mb-1">
@@ -114,7 +114,7 @@ export function RefundsPage() {
             <select
               value={selectedIntentId}
               onChange={(e) => setSelectedIntentId(e.target.value)}
-              className="w-full border border-border px-3 py-2 text-sm font-mono focus:outline-none focus:border-primary"
+              className="w-full bg-surface px-3 py-2 text-sm font-mono rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
             >
               <option value="">Select a payment…</option>
               {refundableIntents.map((intent) => (
@@ -141,7 +141,7 @@ export function RefundsPage() {
               value={amountMajor}
               onChange={(e) => setAmountMajor(e.target.value)}
               placeholder="e.g. 500.00"
-              className="w-full border border-border px-3 py-2 text-sm font-mono focus:outline-none focus:border-primary"
+              className="w-full bg-surface px-3 py-2 text-sm font-mono rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
             />
           </div>
 
@@ -154,7 +154,7 @@ export function RefundsPage() {
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="e.g. Customer requested refund"
-              className="w-full border border-border px-3 py-2 text-sm focus:outline-none focus:border-primary"
+              className="w-full bg-surface px-3 py-2 text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
             />
           </div>
 
@@ -163,7 +163,7 @@ export function RefundsPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="bg-primary text-white px-4 py-2 text-sm font-medium disabled:opacity-50 self-start"
+            className="bg-primary text-white px-4 py-2 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 self-start transition-shadow"
           >
             {submitting ? "Processing…" : "Confirm refund"}
           </button>
@@ -173,7 +173,7 @@ export function RefundsPage() {
       {refunds.length === 0 ? (
         <p className="text-secondary text-sm">No refunds yet.</p>
       ) : (
-        <div>
+        <div className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
           {refunds.map((refund, index) => (
             <div key={refund.id}>
               <div className="flex items-center justify-between py-3">
