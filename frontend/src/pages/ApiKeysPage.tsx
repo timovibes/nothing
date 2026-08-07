@@ -82,21 +82,23 @@ export function ApiKeysPage() {
   }
 
   return (
-    <div className="max-w-2xl">
-      <p className="text-xs uppercase tracking-wide text-secondary mb-2">API Keys</p>
-      <p className="text-secondary text-sm mb-8">
-        Use these to authenticate requests from your own backend to our payments API.
-      </p>
+    <div className="max-w-2xl flex flex-col gap-6">
+      <div>
+        <p className="text-xs uppercase tracking-wide text-secondary mb-2">API Keys</p>
+        <p className="text-secondary text-sm">
+          Use these to authenticate requests from your own backend to our payments API.
+        </p>
+      </div>
 
       {revealedKeys && (
-        <div className="border border-primary p-4 mb-8">
+        <div className="rounded-neu-lg shadow-neu-raised bg-surface p-4">
           <p className="font-mono text-[11px] uppercase tracking-wider text-error mb-3">
             Save these now — the secret key will not be shown again
           </p>
           {revealedKeys.map((key) => {
             const visible = visibleKeyIds.has(key.id);
             return (
-              <div key={key.id} className="flex items-center justify-between py-2 border-t border-border first:border-t-0">
+              <div key={key.id} className="flex items-center justify-between py-2 rounded-neu-sm px-2 -mx-2">
                 <div>
                   <p className="text-xs text-secondary uppercase">{key.key_type}</p>
                   <p className="font-mono text-sm break-all">
@@ -107,14 +109,14 @@ export function ApiKeysPage() {
                   <button
                     onClick={() => toggleKeyVisibility(key.id)}
                     aria-label={visible ? "Hide key" : "Show key"}
-                    className="text-xs uppercase tracking-wide border border-primary px-2 py-1"
+                    className="text-xs uppercase tracking-wide px-2 py-1 rounded-neu-sm shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm transition-shadow"
                   >
                     {visible ? "Hide" : "Show"}
                   </button>
                   <button
                     onClick={() => copyToClipboard(key.id, key.raw_key)}
-                    className="text-xs uppercase tracking-wide border border-primary px-2 py-1 w-16 text-center"
-                    style={copiedKeyIds.has(key.id) ? { color: "#1E7A46", borderColor: "#1E7A46" } : undefined}
+                    className="text-xs uppercase tracking-wide px-2 py-1 w-16 text-center rounded-neu-sm shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm transition-shadow"
+                    style={copiedKeyIds.has(key.id) ? { color: "#1E7A46" } : undefined}
                   >
                     {copiedKeyIds.has(key.id) ? "Copied" : "Copy"}
                   </button>
@@ -131,9 +133,9 @@ export function ApiKeysPage() {
         </div>
       )}
 
-      {error && <p className="text-error text-sm mb-4">{error}</p>}
+      {error && <p className="text-error text-sm">{error}</p>}
 
-      <div>
+      <div className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
         {keys.length === 0 ? (
           <p className="text-secondary text-sm">No API keys yet.</p>
         ) : (
@@ -144,7 +146,7 @@ export function ApiKeysPage() {
                   <span className="font-mono text-sm">
                     {key.display_prefix}…
                   </span>
-                  <span className="font-mono text-[11px] uppercase tracking-wider border border-secondary text-secondary px-2 py-0.5">
+                  <span className="font-mono text-[11px] uppercase tracking-wider px-3 py-1 rounded-neu-full shadow-neu-raised-sm text-secondary">
                     {key.key_type}
                   </span>
                   {!key.is_active && (
@@ -161,41 +163,41 @@ export function ApiKeysPage() {
             </div>
           ))
         )}
+
+        {(keys.length > visibleCount || visiblePairs > 3) && (
+          <div className="flex items-center gap-4 mt-4">
+            {keys.length > visibleCount && (
+              <button
+                onClick={() => setVisiblePairs((n) => n + 3)}
+                className="flex items-center gap-1 text-xs uppercase tracking-wide text-secondary px-2 py-1 rounded-neu-sm hover:shadow-neu-raised-sm transition-shadow"
+              >
+                Show more <ChevronIcon direction="down" />
+              </button>
+            )}
+            {visiblePairs > 3 && (
+              <button
+                onClick={() => setVisiblePairs(3)}
+                className="flex items-center gap-1 text-xs uppercase tracking-wide text-secondary px-2 py-1 rounded-neu-sm hover:shadow-neu-raised-sm transition-shadow"
+              >
+                Show less <ChevronIcon direction="up" />
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      {(keys.length > visibleCount || visiblePairs > 3) && (
-        <div className="flex items-center gap-4 mt-4">
-          {keys.length > visibleCount && (
-            <button
-              onClick={() => setVisiblePairs((n) => n + 3)}
-              className="flex items-center gap-1 text-xs uppercase tracking-wide text-secondary"
-            >
-              Show more <ChevronIcon direction="down" />
-            </button>
-          )}
-          {visiblePairs > 3 && (
-            <button
-              onClick={() => setVisiblePairs(3)}
-              className="flex items-center gap-1 text-xs uppercase tracking-wide text-secondary"
-            >
-              Show less <ChevronIcon direction="up" />
-            </button>
-          )}
-        </div>
-      )}
-
-      <hr className="ledger-divider my-8" />
-
-      <button
-        onClick={handleRegenerate}
-        disabled={regenerating}
-        className="bg-primary text-white px-4 py-2 text-sm font-medium disabled:opacity-50"
-      >
-        {regenerating ? "Regenerating…" : "Regenerate test keys"}
-      </button>
-      <p className="text-xs text-secondary mt-2">
-        This revokes your current test keys immediately and issues a new pair.
-      </p>
+      <div>
+        <button
+          onClick={handleRegenerate}
+          disabled={regenerating}
+          className="bg-primary text-white px-4 py-2 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 transition-shadow"
+        >
+          {regenerating ? "Regenerating…" : "Regenerate test keys"}
+        </button>
+        <p className="text-xs text-secondary mt-2">
+          This revokes your current test keys immediately and issues a new pair.
+        </p>
+      </div>
     </div>
   );
 }
