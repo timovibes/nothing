@@ -2,7 +2,7 @@
 The real Payments list page — replaces the StubPage. Fetches every payment intent for the
 logged-in merchant via the existing JWT dashboard endpoint, and lets the merchant expand any
 row to see its refund history (if any) via the same-shaped refunds endpoint, filtered
-client-side to that intent — mirrors the ledger-tape/stamp visual language from Overview.
+client-side to that intent — styled per our soft neumorphic depth language.
 */
 
 import { useEffect, useState } from "react";
@@ -64,7 +64,7 @@ export function PaymentsPage() {
       {intents.length === 0 ? (
         <p className="text-secondary text-sm">No payments yet.</p>
       ) : (
-        <div>
+        <div className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
           {intents.map((intent, index) => {
             const refunds = refundsByIntent[intent.id] ?? [];
             const isExpanded = expandedId === intent.id;
@@ -74,7 +74,7 @@ export function PaymentsPage() {
               <div key={intent.id}>
                 <button
                   onClick={() => toggleExpanded(intent.id)}
-                  className="w-full flex items-center justify-between py-3 text-left"
+                  className="w-full flex items-center justify-between py-3 text-left rounded-neu-sm px-2 -mx-2 hover:shadow-neu-raised-sm transition-shadow"
                 >
                   <div className="flex items-center gap-4">
                     <span className="font-mono text-sm tabular-nums w-28">
@@ -99,7 +99,7 @@ export function PaymentsPage() {
                 </button>
 
                 {isExpanded && (
-                  <div className="bg-black/[0.02] px-4 py-4 mb-1">
+                  <div className="rounded-neu-sm shadow-neu-inset-sm px-4 py-4 mb-2">
                     <div className="grid grid-cols-2 gap-y-2 text-sm mb-3">
                       <span className="text-secondary">Intent ID</span>
                       <span className="font-mono text-xs break-all">{intent.id}</span>
