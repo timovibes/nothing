@@ -1,29 +1,26 @@
-// the "stamp"-style status indicator from our design plan — sharp rectangular corners, uppercase
-// monospace, colored only by our locked palette (never an arbitrary badge color).
-
 interface StatusPillProps {
   status: string;
 }
 
-const STATUS_STYLES: Record<string, { color: string; border: string }> = {
-  succeeded: { color: "#1E7A46", border: "#1E7A46" },
-  paid: { color: "#1E7A46", border: "#1E7A46" },
-  declined: { color: "#FF5449", border: "#FF5449" },
-  failed: { color: "#FF5449", border: "#FF5449" },
-  processing: { color: "#919191", border: "#919191" },
-  requires_payment_method: { color: "#919191", border: "#919191" },
-  canceled: { color: "#919191", border: "#919191" },
+const STATUS_STYLES: Record<string, { color: string; bg: string }> = {
+  succeeded: { color: "#1E7A46", bg: "rgba(30, 122, 70, 0.08)" },
+  paid: { color: "#1E7A46", bg: "rgba(30, 122, 70, 0.08)" },
+  declined: { color: "#FF5449", bg: "rgba(255, 84, 73, 0.08)" },
+  failed: { color: "#FF5449", bg: "rgba(255, 84, 73, 0.08)" },
+  processing: { color: "#919191", bg: "rgba(145, 145, 145, 0.08)" },
+  requires_payment_method: { color: "#919191", bg: "rgba(145, 145, 145, 0.08)" },
+  canceled: { color: "#919191", bg: "rgba(145, 145, 145, 0.08)" },
 };
 
 export function StatusPill({ status }: StatusPillProps) {
-  const style = STATUS_STYLES[status] ?? { color: "#919191", border: "#919191" };
+  const style = STATUS_STYLES[status] ?? { color: "#919191", bg: "rgba(145, 145, 145, 0.08)" };
 
   return (
     <span
-      className="inline-block font-mono text-[11px] uppercase tracking-wider px-2 py-0.5"
+      className="inline-block font-mono text-[11px] uppercase tracking-wider px-3 py-1 rounded-neu-full shadow-neu-raised-sm"
       style={{
         color: style.color,
-        border: `1px solid ${style.border}`,
+        backgroundColor: style.bg,
       }}
     >
       {status.replace(/_/g, " ")}
