@@ -70,29 +70,29 @@ export function CustomersPage() {
   if (error) return <p className="text-error text-sm">{error}</p>;
 
   return (
-    <div className="max-w-3xl">
-      <div className="flex items-start justify-between mb-8">
+    <div className="max-w-3xl flex flex-col gap-6">
+      <div className="flex items-start justify-between">
         <div>
           <p className="text-xs uppercase tracking-wide text-secondary mb-2">Customers</p>
           <p className="text-secondary text-sm">Everyone who has paid you, guest or registered.</p>
         </div>
         <button
           onClick={() => setShowForm((v) => !v)}
-          className="bg-primary text-white px-4 py-2 text-sm font-medium shrink-0"
+          className="bg-primary text-white px-4 py-2 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm transition-shadow shrink-0"
         >
           {showForm ? "Cancel" : "Add customer"}
         </button>
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className="border border-border p-5 mb-8 flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6 flex flex-col gap-4">
           <div>
             <label className="text-xs uppercase tracking-wide text-secondary block mb-1">Full name</label>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full border border-border px-3 py-2 text-sm focus:outline-none focus:border-primary"
+              className="w-full bg-surface px-3 py-2 text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
             />
           </div>
           <div>
@@ -101,7 +101,7 @@ export function CustomersPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-border px-3 py-2 text-sm font-mono focus:outline-none focus:border-primary"
+              className="w-full bg-surface px-3 py-2 text-sm font-mono rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
             />
           </div>
           <div>
@@ -111,14 +111,14 @@ export function CustomersPage() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+254700000000"
-              className="w-full border border-border px-3 py-2 text-sm font-mono focus:outline-none focus:border-primary"
+              className="w-full bg-surface px-3 py-2 text-sm font-mono rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
             />
           </div>
           {formError && <p className="text-error text-sm">{formError}</p>}
           <button
             type="submit"
             disabled={submitting}
-            className="bg-primary text-white px-4 py-2 text-sm font-medium disabled:opacity-50 self-start"
+            className="bg-primary text-white px-4 py-2 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 self-start transition-shadow"
           >
             {submitting ? "Saving…" : "Create customer"}
           </button>
@@ -128,7 +128,7 @@ export function CustomersPage() {
       {customers.length === 0 ? (
         <p className="text-secondary text-sm">No customers yet.</p>
       ) : (
-        <div>
+        <div className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
           {customers.map((customer, index) => (
             <div key={customer.id}>
               <div className="flex items-center justify-between py-3">
