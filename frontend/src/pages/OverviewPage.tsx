@@ -1,5 +1,5 @@
 /* the real dashboard Overview page — fetches live balance and recent payment activity from our
-new JWT endpoints, styled per our locked palette and ledger-tape/stamp design language. */
+new JWT endpoints, styled per our locked palette and soft neumorphic depth language. */
 
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -46,60 +46,58 @@ export function OverviewPage() {
   }
 
   return (
-    <div className="max-w-3xl">
-        {/* Balance */}
-        <section>
-          <p className="text-xs uppercase tracking-wide text-secondary mb-2">
-            Available balance
-          </p>
-          <p className="font-display font-bold text-4xl tabular-nums">
-            {balance ? formatMoney(balance.available_balance_minor, balance.currency) : "—"}
-          </p>
-          <p className="text-sm text-secondary mt-2">
-            Total settled to date:{" "}
-            <span className="tabular-nums font-mono">
-              {balance ? formatMoney(balance.total_settled_minor, balance.currency) : "—"}
-            </span>
-          </p>
-        </section>
+    <div className="max-w-3xl flex flex-col gap-6">
+      {/* Balance */}
+      <section className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
+        <p className="text-xs uppercase tracking-wide text-secondary mb-2">
+          Available balance
+        </p>
+        <p className="font-display font-bold text-4xl tabular-nums">
+          {balance ? formatMoney(balance.available_balance_minor, balance.currency) : "—"}
+        </p>
+        <p className="text-sm text-secondary mt-2">
+          Total settled to date:{" "}
+          <span className="tabular-nums font-mono">
+            {balance ? formatMoney(balance.total_settled_minor, balance.currency) : "—"}
+          </span>
+        </p>
+      </section>
 
-        <hr className="ledger-divider my-8" />
+      {/* Recent activity */}
+      <section className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
+        <p className="text-xs uppercase tracking-wide text-secondary mb-4">
+          Recent activity
+        </p>
 
-        {/* Recent activity */}
-        <section>
-          <p className="text-xs uppercase tracking-wide text-secondary mb-4">
-            Recent activity
-          </p>
-
-          {intents.length === 0 ? (
-            <p className="text-secondary text-sm">No payments yet.</p>
-          ) : (
-            <div>
-              {intents.map((intent, index) => (
-                <div key={intent.id}>
-                  <div className="flex items-center justify-between py-3">
-                    <div className="flex items-center gap-4">
-                      <span className="font-mono text-sm tabular-nums w-28">
-                        {formatMoney(intent.amount_minor, intent.currency)}
+        {intents.length === 0 ? (
+          <p className="text-secondary text-sm">No payments yet.</p>
+        ) : (
+          <div>
+            {intents.map((intent, index) => (
+              <div key={intent.id}>
+                <div className="flex items-center justify-between py-3">
+                  <div className="flex items-center gap-4">
+                    <span className="font-mono text-sm tabular-nums w-28">
+                      {formatMoney(intent.amount_minor, intent.currency)}
+                    </span>
+                    <StatusPill status={intent.status} />
+                    {intent.failure_reason && (
+                      <span className="text-xs text-secondary font-mono">
+                        {intent.failure_reason}
                       </span>
-                      <StatusPill status={intent.status} />
-                      {intent.failure_reason && (
-                        <span className="text-xs text-secondary font-mono">
-                          {intent.failure_reason}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-4 text-xs text-secondary font-mono">
-                      <span>{formatDate(intent.created_at)}</span>
-                      <span>{shortId(intent.id)}</span>
-                    </div>
+                    )}
                   </div>
-                  {index < intents.length - 1 && <hr className="ledger-divider" />}
+                  <div className="flex items-center gap-4 text-xs text-secondary font-mono">
+                    <span>{formatDate(intent.created_at)}</span>
+                    <span>{shortId(intent.id)}</span>
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
+                {index < intents.length - 1 && <hr className="ledger-divider" />}
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
