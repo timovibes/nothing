@@ -8,8 +8,11 @@ client-side to that intent — styled per our soft neumorphic depth language.
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { StatusPill } from "../components/StatusPill";
+import { ChevronIcon } from "../components/ChevronIcon";
 import { formatMoney, formatDate, shortId } from "../lib/format";
 import type { PaymentIntent, Refund } from "../types";
+
+const PAYMENTS_PER_PAGE = 5;
 
 export function PaymentsPage() {
   const [intents, setIntents] = useState<PaymentIntent[]>([]);
@@ -17,6 +20,7 @@ export function PaymentsPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(PAYMENTS_PER_PAGE);
 
   useEffect(() => {
     async function loadData() {
@@ -54,6 +58,8 @@ export function PaymentsPage() {
     return <p className="text-error text-sm">{error}</p>;
   }
 
+  const visibleIntents = intents.slice(0, visibleCount);
+
   return (
     <div className="max-w-3xl">
       <p className="text-xs uppercase tracking-wide text-secondary mb-2">Payments</p>
@@ -65,7 +71,7 @@ export function PaymentsPage() {
         <p className="text-secondary text-sm">No payments yet.</p>
       ) : (
         <div className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
-          {intents.map((intent, index) => {
+          {visibleIntents.map((intent, index) => {
             const refunds = refundsByIntent[intent.id] ?? [];
             const isExpanded = expandedId === intent.id;
             const isRefundable = intent.status === "succeeded";
@@ -141,10 +147,31 @@ export function PaymentsPage() {
                   </div>
                 )}
 
-                {index < intents.length - 1 && <hr className="ledger-divider" />}
+                {index < visibleIntents.length - 1 && <hr className="ledger-divider" />}
               </div>
             );
           })}
+
+          {(intents.length > visibleCount || visibleCount > PAYMENTS_PER_PAGE) && (
+            <div className="flex items-center gap-4 mt-4">
+              {intents.length > visibleCount && (
+                <button
+                  onClick={() => setVisibleCount((n) => n + PAYMENTS_PER_PAGE)}
+                  className="flex items-center gap-1 text-xs uppercase tracking-wide text-secondary px-2 py-1 rounded-neu-sm hover:shadow-neu-raised-sm transition-shadow"
+                >
+                  Show more <ChevronIcon direction="down" />
+                </button>
+              )}
+              {visibleCount > PAYMENTS_PER_PAGE && (
+                <button
+                  onClick={() => setVisibleCount(PAYMENTS_PER_PAGE)}
+                  className="flex items-center gap-1 text-xs uppercase tracking-wide text-secondary px-2 py-1 rounded-neu-sm hover:shadow-neu-raised-sm transition-shadow"
+                >
+                  Show less <ChevronIcon direction="up" />
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
