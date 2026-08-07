@@ -163,14 +163,16 @@ export function SettingsPage() {
     !!merchant.settlement_account_name;
 
   return (
-    <div className="max-w-2xl">
-      <p className="text-xs uppercase tracking-wide text-secondary mb-2">Settings</p>
-      <p className="text-secondary text-sm mb-8">
-        Your business profile, settlement details, and verification status.
-      </p>
+    <div className="max-w-2xl flex flex-col gap-6">
+      <div>
+        <p className="text-xs uppercase tracking-wide text-secondary mb-2">Settings</p>
+        <p className="text-secondary text-sm">
+          Your business profile, settlement details, and verification status.
+        </p>
+      </div>
 
       {/* Business profile */}
-      <section className="mb-8">
+      <section className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
         <p className="text-xs uppercase tracking-wide text-secondary mb-3">Business profile</p>
         <div className="grid grid-cols-2 gap-y-2 text-sm">
           <span className="text-secondary">Business name</span>
@@ -184,14 +186,15 @@ export function SettingsPage() {
         </div>
       </section>
 
-      <hr className="ledger-divider mb-8" />
-
       {/* KYC status */}
-      <section className="mb-8">
+      <section className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
         <p className="text-xs uppercase tracking-wide text-secondary mb-3">Verification status</p>
         <span
-          className="inline-block font-mono text-[11px] uppercase tracking-wider px-2 py-0.5 mb-2"
-          style={{ color: KYC_COLORS[merchant.kyc_status], border: `1px solid ${KYC_COLORS[merchant.kyc_status]}` }}
+          className="inline-block font-mono text-[11px] uppercase tracking-wider px-3 py-1 rounded-neu-full shadow-neu-raised-sm mb-2"
+          style={{
+            color: KYC_COLORS[merchant.kyc_status],
+            backgroundColor: `${KYC_COLORS[merchant.kyc_status]}14`,
+          }}
         >
           {KYC_LABELS[merchant.kyc_status]}
         </span>
@@ -208,7 +211,7 @@ export function SettingsPage() {
             <button
               onClick={handleSubmitKyc}
               disabled={submittingKyc || !hasBankDetails}
-              className="bg-primary text-white px-4 py-2 text-sm font-medium disabled:opacity-50"
+              className="bg-primary text-white px-4 py-2 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 transition-shadow"
             >
               {submittingKyc ? "Submitting…" : "Submit for review"}
             </button>
@@ -222,10 +225,8 @@ export function SettingsPage() {
         )}
       </section>
 
-      <hr className="ledger-divider mb-8" />
-
       {/* Settlement bank details */}
-      <section className="mb-8">
+      <section className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
         <p className="text-xs uppercase tracking-wide text-secondary mb-3">Settlement bank details</p>
         <p className="text-secondary text-sm mb-4">
           Where your available balance is paid out to, automatically, T+2 days after settlement.
@@ -246,7 +247,7 @@ export function SettingsPage() {
                 required
                 value={bankName}
                 onChange={(e) => setBankName(e.target.value)}
-                className="w-full border border-border px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                className="w-full bg-surface px-3 py-2 text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
               />
             </div>
             <div>
@@ -256,7 +257,7 @@ export function SettingsPage() {
                 required
                 value={accountNumber}
                 onChange={(e) => setAccountNumber(e.target.value)}
-                className="w-full border border-border px-3 py-2 text-sm font-mono focus:outline-none focus:border-primary"
+                className="w-full bg-surface px-3 py-2 text-sm font-mono rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
               />
             </div>
             <div>
@@ -266,7 +267,7 @@ export function SettingsPage() {
                 required
                 value={accountName}
                 onChange={(e) => setAccountName(e.target.value)}
-                className="w-full border border-border px-3 py-2 text-sm focus:outline-none focus:border-primary"
+                className="w-full bg-surface px-3 py-2 text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
               />
             </div>
             {bankError && <p className="text-error text-sm">{bankError}</p>}
@@ -274,7 +275,7 @@ export function SettingsPage() {
               <button
                 type="submit"
                 disabled={savingBankDetails}
-                className="bg-primary text-white px-4 py-2 text-sm font-medium disabled:opacity-50 self-start"
+                className="bg-primary text-white px-4 py-2 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 self-start transition-shadow"
               >
                 {savingBankDetails ? "Saving…" : "Save bank details"}
               </button>
@@ -307,7 +308,7 @@ export function SettingsPage() {
             </div>
             <button
               onClick={() => setEditingBankDetails(true)}
-              className="border border-primary px-4 py-2 text-sm font-medium"
+              className="px-4 py-2 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm transition-shadow"
             >
               Edit bank details
             </button>
@@ -317,74 +318,71 @@ export function SettingsPage() {
 
       {/* Live API keys */}
       {merchant.is_live_mode_enabled && (
-        <>
-          <hr className="ledger-divider mb-8" />
-          <section>
-            <p className="text-xs uppercase tracking-wide text-secondary mb-3">Live API keys</p>
-            <p className="text-secondary text-sm mb-4">
-              Issue your live key pair. Manage them alongside your test keys on the API Keys page.
-            </p>
+        <section className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
+          <p className="text-xs uppercase tracking-wide text-secondary mb-3">Live API keys</p>
+          <p className="text-secondary text-sm mb-4">
+            Issue your live key pair. Manage them alongside your test keys on the API Keys page.
+          </p>
 
-            {revealedLiveKeys && (
-              <div className="border border-primary p-4 mb-4">
-                {liveKeysIssued && (
-                  <p className="text-sm mb-3" style={{ color: "#1E7A46" }}>
-                    Live keys issued successfully.
-                  </p>
-                )}
-                <p className="font-mono text-[11px] uppercase tracking-wider text-error mb-3">
-                  Save these now — the secret key will not be shown again
+          {revealedLiveKeys && (
+            <div className="rounded-neu-lg shadow-neu-raised p-4 mb-4">
+              {liveKeysIssued && (
+                <p className="text-sm mb-3" style={{ color: "#1E7A46" }}>
+                  Live keys issued successfully.
                 </p>
-                {revealedLiveKeys.map((key) => {
-                  const visible = visibleKeyIds.has(key.id);
-                  return (
-                    <div key={key.id} className="flex items-center justify-between py-2 border-t border-border first:border-t-0">
-                      <div>
-                        <p className="text-xs text-secondary uppercase">{key.key_type}</p>
-                        <p className="font-mono text-sm break-all">
-                          {visible ? key.raw_key : maskKey(key.raw_key)}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0 ml-4">
-                        <button
-                          onClick={() => toggleKeyVisibility(key.id)}
-                          aria-label={visible ? "Hide key" : "Show key"}
-                          className="text-xs uppercase tracking-wide border border-primary px-2 py-1"
-                        >
-                          {visible ? "Hide" : "Show"}
-                        </button>
-                        <button
-                          onClick={() => copyToClipboard(key.id, key.raw_key)}
-                          className="text-xs uppercase tracking-wide border border-primary px-2 py-1 w-16 text-center"
-                          style={copiedKeyIds.has(key.id) ? { color: "#1E7A46", borderColor: "#1E7A46" } : undefined}
-                        >
-                          {copiedKeyIds.has(key.id) ? "Copied" : "Copy"}
-                        </button>
-                      </div>
+              )}
+              <p className="font-mono text-[11px] uppercase tracking-wider text-error mb-3">
+                Save these now — the secret key will not be shown again
+              </p>
+              {revealedLiveKeys.map((key) => {
+                const visible = visibleKeyIds.has(key.id);
+                return (
+                  <div key={key.id} className="flex items-center justify-between py-2 rounded-neu-sm px-2 -mx-2">
+                    <div>
+                      <p className="text-xs text-secondary uppercase">{key.key_type}</p>
+                      <p className="font-mono text-sm break-all">
+                        {visible ? key.raw_key : maskKey(key.raw_key)}
+                      </p>
                     </div>
-                  );
-                })}
-                <p className="text-xs text-secondary mt-3">
-                  You can also find these (masked) on the{" "}
-                  <Link to="/api-keys" className="text-primary underline">
-                    API Keys page
-                  </Link>
-                  .
-                </p>
-              </div>
-            )}
+                    <div className="flex items-center gap-2 shrink-0 ml-4">
+                      <button
+                        onClick={() => toggleKeyVisibility(key.id)}
+                        aria-label={visible ? "Hide key" : "Show key"}
+                        className="text-xs uppercase tracking-wide px-2 py-1 rounded-neu-sm shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm transition-shadow"
+                      >
+                        {visible ? "Hide" : "Show"}
+                      </button>
+                      <button
+                        onClick={() => copyToClipboard(key.id, key.raw_key)}
+                        className="text-xs uppercase tracking-wide px-2 py-1 w-16 text-center rounded-neu-sm shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm transition-shadow"
+                        style={copiedKeyIds.has(key.id) ? { color: "#1E7A46" } : undefined}
+                      >
+                        {copiedKeyIds.has(key.id) ? "Copied" : "Copy"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+              <p className="text-xs text-secondary mt-3">
+                You can also find these (masked) on the{" "}
+                <Link to="/api-keys" className="text-primary underline">
+                  API Keys page
+                </Link>
+                .
+              </p>
+            </div>
+          )}
 
-            {liveKeysError && <p className="text-error text-sm mb-3">{liveKeysError}</p>}
+          {liveKeysError && <p className="text-error text-sm mb-3">{liveKeysError}</p>}
 
-            <button
-              onClick={handleIssueLiveKeys}
-              disabled={issuingLiveKeys}
-              className="bg-primary text-white px-4 py-2 text-sm font-medium disabled:opacity-50"
-            >
-              {issuingLiveKeys ? "Issuing…" : "Issue live keys"}
-            </button>
-          </section>
-        </>
+          <button
+            onClick={handleIssueLiveKeys}
+            disabled={issuingLiveKeys}
+            className="bg-primary text-white px-4 py-2 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 transition-shadow"
+          >
+            {issuingLiveKeys ? "Issuing…" : "Issue live keys"}
+          </button>
+        </section>
       )}
     </div>
   );
