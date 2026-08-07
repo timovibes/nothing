@@ -15,6 +15,23 @@ CSS via @theme, replacing the old tailwind.config.js approach entirely. */
   --font-display: "Archivo", sans-serif;
   --font-body: "IBM Plex Sans", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
+
+  /* Neumorphic radius scale — soft, pillowy corners. "sm" for chips/badges/inputs,
+     "md" for buttons/small cards, "lg" for panels/containers, "full" for pill shapes. */
+  --radius-neu-sm: 14px;
+  --radius-neu-md: 20px;
+  --radius-neu-lg: 28px;
+  --radius-neu-full: 999px;
+
+  /* Neumorphic shadow scale — each is a layered pair (dark shadow bottom-right,
+     light highlight top-left) plus a third, larger, low-opacity "feather" layer
+     that gives the soft fuzzy edge instead of a hard-edged drop shadow. Light
+     source is fixed top-left across the whole app so depth reads consistently. */
+  --shadow-neu-raised-sm: 4px 4px 10px rgba(0, 0, 0, 0.10), -4px -4px 10px rgba(255, 255, 255, 0.85);
+  --shadow-neu-raised: 8px 8px 20px rgba(0, 0, 0, 0.12), -8px -8px 20px rgba(255, 255, 255, 0.9), 16px 16px 40px rgba(0, 0, 0, 0.04);
+  --shadow-neu-hover: 10px 10px 26px rgba(0, 0, 0, 0.14), -10px -10px 26px rgba(255, 255, 255, 0.95), 20px 20px 50px rgba(0, 0, 0, 0.05);
+  --shadow-neu-inset: inset 6px 6px 14px rgba(0, 0, 0, 0.08), inset -6px -6px 14px rgba(255, 255, 255, 0.85);
+  --shadow-neu-inset-sm: inset 3px 3px 7px rgba(0, 0, 0, 0.08), inset -3px -3px 7px rgba(255, 255, 255, 0.85);
 }
 
 body {
