@@ -52,7 +52,7 @@ export function AcceptInvitePage() {
 
   return (
     <div className="min-h-screen bg-surface flex items-center justify-center px-6">
-      <form onSubmit={handleSubmit} className="w-full max-w-sm flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="w-full max-w-sm flex flex-col gap-4 rounded-neu-lg shadow-neu-raised bg-surface p-8">
         <p className="font-display font-bold text-lg mb-2">nothing</p>
         <p className="text-sm text-secondary mb-4">Set a password to activate your account.</p>
         <div>
@@ -63,14 +63,14 @@ export function AcceptInvitePage() {
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border border-border px-3 py-2 text-sm focus:outline-none focus:border-primary"
+            className="w-full bg-surface px-3 py-2 text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
           />
         </div>
         {error && <p className="text-error text-sm">{error}</p>}
         <button
           type="submit"
           disabled={submitting}
-          className="bg-primary text-white px-4 py-3 text-sm font-medium disabled:opacity-50"
+          className="bg-primary text-white px-4 py-3 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 transition-shadow"
         >
           {submitting ? "Activating…" : "Activate account"}
         </button>

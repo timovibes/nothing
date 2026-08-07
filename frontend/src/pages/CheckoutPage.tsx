@@ -110,7 +110,7 @@ export function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-surface flex items-center justify-center px-6 py-12">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm rounded-neu-lg shadow-neu-raised-sm bg-surface p-8">
         <p className="font-display font-bold text-lg mb-8">nothing</p>
 
         <div className="mb-8">
@@ -147,7 +147,7 @@ export function CheckoutPage() {
                 value={cardNumber}
                 onChange={(e) => setCardNumber(e.target.value)}
                 placeholder="4242 4242 4242 4242"
-                className="w-full border border-border px-3 py-2 font-mono text-sm focus:outline-none focus:border-primary"
+                className="w-full bg-surface px-3 py-2 font-mono text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
               />
             </div>
 
@@ -163,7 +163,7 @@ export function CheckoutPage() {
                   value={expMonth}
                   onChange={(e) => setExpMonth(e.target.value)}
                   placeholder="12"
-                  className="w-full border border-border px-3 py-2 font-mono text-sm focus:outline-none focus:border-primary"
+                  className="w-full bg-surface px-3 py-2 font-mono text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
                 />
               </div>
               <div className="flex-1">
@@ -177,7 +177,7 @@ export function CheckoutPage() {
                   value={expYear}
                   onChange={(e) => setExpYear(e.target.value)}
                   placeholder="2027"
-                  className="w-full border border-border px-3 py-2 font-mono text-sm focus:outline-none focus:border-primary"
+                  className="w-full bg-surface px-3 py-2 font-mono text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
                 />
               </div>
               <div className="flex-1">
@@ -191,7 +191,7 @@ export function CheckoutPage() {
                   value={cvv}
                   onChange={(e) => setCvv(e.target.value)}
                   placeholder="123"
-                  className="w-full border border-border px-3 py-2 font-mono text-sm focus:outline-none focus:border-primary"
+                  className="w-full bg-surface px-3 py-2 font-mono text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
                 />
               </div>
             </div>
@@ -201,7 +201,7 @@ export function CheckoutPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="bg-primary text-white px-4 py-3 text-sm font-medium disabled:opacity-50 mt-2"
+              className="bg-primary text-white px-4 py-3 text-sm font-medium rounded-neu-md shadow-neu-raised-sm active:shadow-neu-inset-sm disabled:opacity-50 mt-2 transition-shadow"
             >
               {submitting ? "Processing…" : `Pay ${formatMoney(intent.amount_minor, intent.currency)}`}
             </button>

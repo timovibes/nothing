@@ -37,7 +37,7 @@ export function OnboardingPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface px-4">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm rounded-neu-lg shadow-neu-raised bg-surface p-8">
         <h1 className="font-display font-bold text-2xl mb-1">Set up your business</h1>
         <p className="text-secondary text-sm mb-8">
           You can start testing right away — no need to verify anything first.
@@ -53,7 +53,7 @@ export function OnboardingPage() {
               required
               value={businessName}
               onChange={(e) => setBusinessName(e.target.value)}
-              className="w-full border border-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full bg-surface px-3 py-2 text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
             />
           </div>
           <div>
@@ -65,7 +65,7 @@ export function OnboardingPage() {
               required
               value={businessEmail}
               onChange={(e) => setBusinessEmail(e.target.value)}
-              className="w-full border border-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full bg-surface px-3 py-2 text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -79,7 +79,7 @@ export function OnboardingPage() {
                 maxLength={2}
                 value={country}
                 onChange={(e) => setCountry(e.target.value.toUpperCase())}
-                className="w-full border border-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full bg-surface px-3 py-2 text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
               />
             </div>
             <div>
@@ -92,7 +92,7 @@ export function OnboardingPage() {
                 maxLength={3}
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value.toUpperCase())}
-                className="w-full border border-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full bg-surface px-3 py-2 text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
               />
             </div>
           </div>
@@ -100,7 +100,7 @@ export function OnboardingPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-white py-2 text-sm font-medium disabled:opacity-50"
+            className="w-full bg-primary text-white py-2 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 transition-shadow"
           >
             {loading ? "Creating…" : "Create business"}
           </button>

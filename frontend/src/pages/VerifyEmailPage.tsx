@@ -44,7 +44,7 @@ export function VerifyEmailPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface px-4">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm rounded-neu-lg shadow-neu-raised bg-surface p-8">
         <h1 className="font-display font-bold text-2xl mb-1">nothing</h1>
         <p className="text-secondary text-sm mb-8">
           Enter the 6-digit code we sent to <span className="text-primary">{email}</span>
@@ -57,7 +57,7 @@ export function VerifyEmailPage() {
             maxLength={6}
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            className="w-full border border-primary px-3 py-2 text-sm font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full bg-surface px-3 py-2 text-sm font-mono tracking-widest rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
             placeholder="000000"
           />
           {error && <p className="text-error text-sm">{error}</p>}
@@ -65,7 +65,7 @@ export function VerifyEmailPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-white py-2 text-sm font-medium disabled:opacity-50"
+            className="w-full bg-primary text-white py-2 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 transition-shadow"
           >
             {loading ? "Verifying…" : "Verify email"}
           </button>
