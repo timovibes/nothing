@@ -47,16 +47,18 @@ export function AdminFraudPage() {
   if (error) return <p className="text-error text-sm">{error}</p>;
 
   return (
-    <div className="max-w-3xl">
-      <p className="text-xs uppercase tracking-wide text-secondary mb-2">Fraud Review</p>
-      <p className="text-secondary text-sm mb-8">
-        Payments held for manual review before authorization is allowed to proceed.
-      </p>
+    <div className="max-w-3xl flex flex-col gap-6">
+      <div>
+        <p className="text-xs uppercase tracking-wide text-secondary mb-2">Fraud Review</p>
+        <p className="text-secondary text-sm">
+          Payments held for manual review before authorization is allowed to proceed.
+        </p>
+      </div>
 
       {cases.length === 0 ? (
         <p className="text-secondary text-sm">No pending fraud cases.</p>
       ) : (
-        <div>
+        <div className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
           {cases.map((fraudCase, index) => (
             <div key={fraudCase.id}>
               <div className="flex items-center justify-between py-4">
@@ -64,8 +66,8 @@ export function AdminFraudPage() {
                   <div className="flex items-center gap-3 mb-1">
                     <span className="font-mono text-sm">{shortId(fraudCase.payment_intent_id)}</span>
                     <span
-                      className="font-mono text-[11px] uppercase tracking-wider px-2 py-0.5 border"
-                      style={{ color: "#FF5449", borderColor: "#FF5449" }}
+                      className="font-mono text-[11px] uppercase tracking-wider px-3 py-1 rounded-neu-full shadow-neu-raised-sm"
+                      style={{ color: "#FF5449", backgroundColor: "#FF544914" }}
                     >
                       Risk score {fraudCase.risk_score}
                     </span>
@@ -76,7 +78,7 @@ export function AdminFraudPage() {
                   <button
                     onClick={() => handleDecision(fraudCase.id, true)}
                     disabled={actingOnId === fraudCase.id}
-                    className="text-white px-3 py-1.5 text-xs uppercase tracking-wide disabled:opacity-50"
+                    className="text-white px-3 py-1.5 text-xs uppercase tracking-wide rounded-neu-sm shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 transition-shadow"
                     style={{ backgroundColor: "#1E7A46" }}
                   >
                     Approve
@@ -84,7 +86,7 @@ export function AdminFraudPage() {
                   <button
                     onClick={() => handleDecision(fraudCase.id, false)}
                     disabled={actingOnId === fraudCase.id}
-                    className="text-white px-3 py-1.5 text-xs uppercase tracking-wide disabled:opacity-50"
+                    className="text-white px-3 py-1.5 text-xs uppercase tracking-wide rounded-neu-sm shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 transition-shadow"
                     style={{ backgroundColor: "#FF5449" }}
                   >
                     Reject
