@@ -60,19 +60,23 @@ export function AdminMerchantsPage() {
   }
 
   return (
-    <div className="max-w-3xl">
-      <p className="text-xs uppercase tracking-wide text-secondary mb-2">Merchant KYC</p>
-      <p className="text-secondary text-sm mb-6">
-        Review and approve or reject merchant verification submissions.
-      </p>
+    <div className="max-w-3xl flex flex-col gap-6">
+      <div>
+        <p className="text-xs uppercase tracking-wide text-secondary mb-2">Merchant KYC</p>
+        <p className="text-secondary text-sm">
+          Review and approve or reject merchant verification submissions.
+        </p>
+      </div>
 
-      <div className="flex gap-2 mb-8">
+      <div className="flex gap-2 flex-wrap">
         {FILTERS.map((f) => (
           <button
             key={f.value}
             onClick={() => setFilter(f.value)}
-            className={`text-xs uppercase tracking-wide px-3 py-1.5 border ${
-              filter === f.value ? "border-primary text-primary" : "border-border text-secondary"
+            className={`text-xs uppercase tracking-wide px-3 py-1.5 rounded-neu-full transition-shadow ${
+              filter === f.value
+                ? "text-primary font-medium shadow-neu-inset-sm"
+                : "text-secondary shadow-neu-raised-sm hover:shadow-neu-hover"
             }`}
           >
             {f.label}
@@ -87,7 +91,7 @@ export function AdminMerchantsPage() {
       ) : merchants.length === 0 ? (
         <p className="text-secondary text-sm">No merchants in this state.</p>
       ) : (
-        <div>
+        <div className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
           {merchants.map((merchant, index) => (
             <div key={merchant.id}>
               <div className="py-4">
@@ -113,7 +117,7 @@ export function AdminMerchantsPage() {
                     <button
                       onClick={() => handleDecision(merchant.id, true)}
                       disabled={actingOnId === merchant.id}
-                      className="text-white px-3 py-1.5 text-xs uppercase tracking-wide disabled:opacity-50"
+                      className="text-white px-3 py-1.5 text-xs uppercase tracking-wide rounded-neu-sm shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 transition-shadow"
                       style={{ backgroundColor: "#1E7A46" }}
                     >
                       Approve
@@ -123,12 +127,12 @@ export function AdminMerchantsPage() {
                       placeholder="Rejection reason (optional)"
                       value={rejectReason[merchant.id] ?? ""}
                       onChange={(e) => setRejectReason((prev) => ({ ...prev, [merchant.id]: e.target.value }))}
-                      className="border border-border px-2 py-1.5 text-xs flex-1 focus:outline-none focus:border-primary"
+                      className="bg-surface px-2 py-1.5 text-xs flex-1 rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
                     />
                     <button
                       onClick={() => handleDecision(merchant.id, false)}
                       disabled={actingOnId === merchant.id}
-                      className="text-white px-3 py-1.5 text-xs uppercase tracking-wide disabled:opacity-50"
+                      className="text-white px-3 py-1.5 text-xs uppercase tracking-wide rounded-neu-sm shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 transition-shadow"
                       style={{ backgroundColor: "#FF5449" }}
                     >
                       Reject
