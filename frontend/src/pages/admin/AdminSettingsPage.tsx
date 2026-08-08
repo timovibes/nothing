@@ -68,13 +68,15 @@ export function AdminSettingsPage() {
   if (error) return <p className="text-error text-sm">{error}</p>;
 
   return (
-    <div className="max-w-3xl">
-      <p className="text-xs uppercase tracking-wide text-secondary mb-2">System Settings</p>
-      <p className="text-secondary text-sm mb-8">
-        Global platform configuration — fee defaults, feature toggles, and similar.
-      </p>
+    <div className="max-w-3xl flex flex-col gap-6">
+      <div>
+        <p className="text-xs uppercase tracking-wide text-secondary mb-2">System Settings</p>
+        <p className="text-secondary text-sm">
+          Global platform configuration — fee defaults, feature toggles, and similar.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="border border-border p-5 mb-8 flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6 flex flex-col gap-4">
         <div>
           <label className="text-xs uppercase tracking-wide text-secondary block mb-1">Key</label>
           <input
@@ -83,7 +85,7 @@ export function AdminSettingsPage() {
             value={key}
             onChange={(e) => setKey(e.target.value)}
             placeholder="e.g. default_settlement_delay_days"
-            className="w-full border border-border px-3 py-2 text-sm font-mono focus:outline-none focus:border-primary"
+            className="w-full bg-surface px-3 py-2 text-sm font-mono rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
           />
         </div>
         <div>
@@ -94,7 +96,7 @@ export function AdminSettingsPage() {
             value={valueJson}
             onChange={(e) => setValueJson(e.target.value)}
             placeholder='e.g. {"days": 2}'
-            className="w-full border border-border px-3 py-2 text-sm font-mono focus:outline-none focus:border-primary"
+            className="w-full bg-surface px-3 py-2 text-sm font-mono rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
           />
         </div>
         <div>
@@ -103,14 +105,14 @@ export function AdminSettingsPage() {
             type="text"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full border border-border px-3 py-2 text-sm focus:outline-none focus:border-primary"
+            className="w-full bg-surface px-3 py-2 text-sm rounded-neu-sm shadow-neu-inset-sm border-none focus:outline-none focus:shadow-neu-inset"
           />
         </div>
         {saveError && <p className="text-error text-sm">{saveError}</p>}
         <button
           type="submit"
           disabled={saving}
-          className="bg-primary text-white px-4 py-2 text-sm font-medium disabled:opacity-50 self-start"
+          className="bg-primary text-white px-4 py-2 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 self-start transition-shadow"
         >
           {saving ? "Saving…" : "Save setting"}
         </button>
@@ -119,7 +121,7 @@ export function AdminSettingsPage() {
       {settings.length === 0 ? (
         <p className="text-secondary text-sm">No settings configured yet.</p>
       ) : (
-        <div>
+        <div className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
           {settings.map((setting, index) => (
             <div key={setting.id}>
               <div className="py-3">
@@ -127,7 +129,7 @@ export function AdminSettingsPage() {
                   <span className="font-mono text-sm">{setting.key}</span>
                   <span className="text-xs text-secondary font-mono">{formatDate(setting.updated_at)}</span>
                 </div>
-                <pre className="font-mono text-xs text-secondary bg-black/[0.02] px-2 py-1 inline-block">
+                <pre className="font-mono text-xs text-secondary rounded-neu-sm shadow-neu-inset-sm px-2 py-1 inline-block">
                   {JSON.stringify(setting.value)}
                 </pre>
                 {setting.description && <p className="text-xs text-secondary mt-1">{setting.description}</p>}
