@@ -50,8 +50,8 @@ export function AdminReportsPage() {
   if (error) return <p className="text-error text-sm">{error}</p>;
 
   return (
-    <div className="max-w-3xl">
-      <div className="flex items-start justify-between mb-8">
+    <div className="max-w-3xl flex flex-col gap-6">
+      <div className="flex items-start justify-between">
         <div>
           <p className="text-xs uppercase tracking-wide text-secondary mb-2">Reports</p>
           <p className="text-secondary text-sm">Async CSV exports of platform payment data.</p>
@@ -59,7 +59,7 @@ export function AdminReportsPage() {
         <button
           onClick={handleGenerate}
           disabled={generating}
-          className="bg-primary text-white px-4 py-2 text-sm font-medium disabled:opacity-50 shrink-0"
+          className="bg-primary text-white px-4 py-2 text-sm font-medium rounded-neu-md shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm disabled:opacity-50 shrink-0 transition-shadow"
         >
           {generating ? "Starting…" : "Generate payments report"}
         </button>
@@ -68,19 +68,19 @@ export function AdminReportsPage() {
       {reports.length === 0 ? (
         <p className="text-secondary text-sm">No reports generated yet.</p>
       ) : (
-        <div>
+        <div className="rounded-neu-lg shadow-neu-raised-sm bg-surface p-6">
           {reports.map((report, index) => (
             <div key={report.id}>
               <div className="flex items-center justify-between py-3">
                 <div>
                   <span className="font-mono text-sm">{report.report_type}</span>
                   <span
-                    className="font-mono text-[11px] uppercase tracking-wider px-2 py-0.5 border ml-3"
+                    className="font-mono text-[11px] uppercase tracking-wider px-3 py-1 rounded-neu-full shadow-neu-raised-sm ml-3"
                     style={{
                       color:
                         report.status === "completed" ? "#1E7A46" : report.status === "failed" ? "#FF5449" : "#919191",
-                      borderColor:
-                        report.status === "completed" ? "#1E7A46" : report.status === "failed" ? "#FF5449" : "#919191",
+                      backgroundColor:
+                        report.status === "completed" ? "#1E7A4614" : report.status === "failed" ? "#FF544914" : "#91919114",
                     }}
                   >
                     {report.status}
@@ -94,7 +94,7 @@ export function AdminReportsPage() {
                   {report.status === "completed" && report.file_path && (
                     
                       <a href={downloadUrl(report.id)}
-                      className="text-xs uppercase tracking-wide border border-primary px-2 py-1"
+                      className="text-xs uppercase tracking-wide px-2 py-1 rounded-neu-sm shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm transition-shadow"
                     >
                       Download
                     </a>
