@@ -143,14 +143,35 @@ export interface MaintenanceWindow {
   created_at: string;
 }
 
+// "format" added in Phase 1 (backend now supports CSV and PDF export) — was missing
+// from this type before, which is what blocked AdminReportsPage from referencing it.
 export interface ReportExport {
   id: string;
   report_type: string;
+  format: "csv" | "pdf" | string;
   status: "pending" | "completed" | "failed" | string;
   file_path: string | null;
   error_message: string | null;
   created_at: string;
   completed_at: string | null;
+}
+
+// New in Phase 2 — mirrors backend's ReportSummaryResponse / DailyRevenuePoint /
+// StatusBreakdownPoint schemas exactly, for the /admin/reports/summary endpoint.
+export interface DailyRevenuePoint {
+  date: string;
+  amount_minor: number;
+  count: number;
+}
+
+export interface StatusBreakdownPoint {
+  status: string;
+  count: number;
+}
+
+export interface ReportSummary {
+  daily_revenue: DailyRevenuePoint[];
+  status_breakdown: StatusBreakdownPoint[];
 }
 
 export interface StaffMember {
