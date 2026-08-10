@@ -8,7 +8,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from app.models.admin import ReportStatus
+from app.models.admin import ReportStatus, ReportFormat
 
 
 class SystemSettingRequest(BaseModel):
@@ -68,9 +68,14 @@ class MerchantVerifyRequest(BaseModel):
     reason: str | None = None
 
 
+class ReportGenerateRequest(BaseModel):
+    format: ReportFormat = ReportFormat.CSV
+
+
 class ReportExportResponse(BaseModel):
     id: uuid.UUID
     report_type: str
+    format: ReportFormat
     status: ReportStatus
     file_path: str | None
     error_message: str | None

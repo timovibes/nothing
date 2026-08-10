@@ -19,6 +19,11 @@ class ReportStatus(str, enum.Enum):
     FAILED = "failed"
 
 
+class ReportFormat(str, enum.Enum):
+    CSV = "csv"
+    PDF = "pdf"
+
+
 class SystemSetting(Base):
     __tablename__ = "system_settings"
 
@@ -35,7 +40,6 @@ class FeatureFlag(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     key = Column(String(100), nullable=False, index=True)
-    # Nullable merchant_id: null = global flag, set = overrides the global value for one merchant
     merchant_id = Column(UUID(as_uuid=True), ForeignKey("merchants.id"), nullable=True, index=True)
 
     enabled = Column(Boolean, nullable=False, default=False)
@@ -65,7 +69,8 @@ class ReportExport(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     requested_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
 
-    report_type = Column(String(100), nullable=False)  # e.g. "payments_csv"
+    report_type = Column(String(100), nullable=False)  # e.g. "payments"
+    format = Column(Enum(ReportFormat), nullable=False, default=ReportFormat.CSV)
     status = Column(Enum(ReportStatus), nullable=False, default=ReportStatus.PENDING)
     file_path = Column(String(500), nullable=True)
     error_message = Column(String(1000), nullable=True)

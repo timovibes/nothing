@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
-from app.models.admin import SystemSetting, FeatureFlag, MaintenanceWindow, ReportExport, ReportStatus
+from app.models.admin import SystemSetting, FeatureFlag, MaintenanceWindow, ReportExport, ReportStatus, ReportFormat
 
 
 class AdminRepository:
@@ -72,8 +72,8 @@ class AdminRepository:
         return self.db.query(MaintenanceWindow).order_by(MaintenanceWindow.starts_at.desc()).all()
 
     # --- Report exports ---
-    def create_report(self, requested_by: uuid.UUID, report_type: str) -> ReportExport:
-        report = ReportExport(requested_by=requested_by, report_type=report_type, status=ReportStatus.PENDING)
+    def create_report(self, requested_by: uuid.UUID, report_type: str, format: ReportFormat) -> ReportExport:
+        report = ReportExport(requested_by=requested_by, report_type=report_type, format=format, status=ReportStatus.PENDING)
         self.db.add(report)
         self.db.commit()
         self.db.refresh(report)

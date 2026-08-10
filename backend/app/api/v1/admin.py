@@ -22,6 +22,7 @@ from app.schemas.admin import (
     MaintenanceWindowRequest,
     MaintenanceWindowResponse,
     MerchantVerifyRequest,
+    ReportGenerateRequest,
     ReportExportResponse,
 )
 from app.schemas.merchant import MerchantResponse
@@ -83,10 +84,12 @@ def verify_merchant(
 
 
 # --- Report exports ---
-@router.post("/reports/payments-csv", response_model=ReportExportResponse, status_code=status.HTTP_201_CREATED)
-def generate_payments_report(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+@router.post("/reports/payments", response_model=ReportExportResponse, status_code=status.HTTP_201_CREATED)
+def generate_payments_report(
+    payload: ReportGenerateRequest, admin: User = Depends(require_admin), db: Session = Depends(get_db)
+):
     service = AdminService(db)
-    return service.generate_payments_report(admin.id)
+    return service.generate_report(admin.id, payload.format)
 
 
 @router.get("/reports", response_model=list[ReportExportResponse])
@@ -101,7 +104,9 @@ def download_report(report_id: uuid.UUID, admin: User = Depends(require_admin), 
     report = service.get_report(report_id)
     if report.file_path is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Report has no file available")
-    return FileResponse(report.file_path, filename=f"{report.report_type}_{report.id}.csv", media_type="text/csv")
+    media_type = "application/pdf" if report.format.value == "pdf" else "text/csv"
+    filename = f"{report.report_type}_{report.id}.{report.format.value}"
+    return FileResponse(report.file_path, filename=filename, media_type=media_type)
 
 
 # --- Public status page (no auth) ---

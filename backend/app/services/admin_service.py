@@ -1,7 +1,6 @@
 """
 business logic for settings/flags/maintenance windows, report generation
-(synchronous CSV export), and merchant KYC verification — the real replacement for our earlier
-manual psql hack.
+(synchronous CSV/PDF export), and merchant KYC verification.
 """
 
 import csv
@@ -10,12 +9,15 @@ import uuid
 from datetime import datetime
 
 from fastapi import HTTPException, status
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from sqlalchemy.orm import Session
 
 from app.repositories.admin_repository import AdminRepository
 from app.repositories.merchant_repository import MerchantRepository
 from app.models.merchant import KycStatus
-from app.models.admin import ReportStatus, ReportExport
+from app.models.admin import ReportStatus, ReportFormat, ReportExport
 from app.models.payment import PaymentIntent
 
 REPORTS_DIR = "storage/reports"
@@ -64,27 +66,53 @@ class AdminService:
         return self.merchant_repo.update_kyc_status(merchant, new_status, rejection_reason=None if approved else reason)
 
     # --- Report exports ---
-    def generate_payments_report(self, requested_by: uuid.UUID) -> ReportExport:
-        report = self.repo.create_report(requested_by, "payments_csv")
+    REPORT_COLUMNS = ["id", "merchant_id", "amount_minor", "currency", "status", "created_at"]
+
+    def _payment_rows(self) -> list[list[str]]:
+        intents = self.db.query(PaymentIntent).order_by(PaymentIntent.created_at.desc()).all()
+        return [
+            [
+                str(intent.id),
+                str(intent.merchant_id),
+                str(intent.amount_minor),
+                intent.currency,
+                intent.status.value,
+                intent.created_at.isoformat(),
+            ]
+            for intent in intents
+        ]
+
+    def _write_csv(self, file_path: str, rows: list[list[str]]) -> None:
+        with open(file_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(self.REPORT_COLUMNS)
+            writer.writerows(rows)
+
+    def _write_pdf(self, file_path: str, rows: list[list[str]]) -> None:
+        doc = SimpleDocTemplate(file_path, pagesize=letter)
+        table_data = [self.REPORT_COLUMNS] + rows
+        table = Table(table_data, repeatRows=1)
+        table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.black),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("FONTSIZE", (0, 0), (-1, -1), 7),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ]))
+        doc.build([table])
+
+    def generate_report(self, requested_by: uuid.UUID, format: ReportFormat) -> ReportExport:
+        report = self.repo.create_report(requested_by, "payments", format)
 
         try:
             os.makedirs(REPORTS_DIR, exist_ok=True)
-            file_path = os.path.join(REPORTS_DIR, f"{report.id}.csv")
+            extension = "csv" if format == ReportFormat.CSV else "pdf"
+            file_path = os.path.join(REPORTS_DIR, f"{report.id}.{extension}")
 
-            intents = self.db.query(PaymentIntent).order_by(PaymentIntent.created_at.desc()).all()
-
-            with open(file_path, "w", newline="", encoding="utf-8") as f:
-                writer = csv.writer(f)
-                writer.writerow(["id", "merchant_id", "amount_minor", "currency", "status", "created_at"])
-                for intent in intents:
-                    writer.writerow([
-                        str(intent.id),
-                        str(intent.merchant_id),
-                        intent.amount_minor,
-                        intent.currency,
-                        intent.status.value,
-                        intent.created_at.isoformat(),
-                    ])
+            rows = self._payment_rows()
+            if format == ReportFormat.CSV:
+                self._write_csv(file_path, rows)
+            else:
+                self._write_pdf(file_path, rows)
 
             return self.repo.update_report_status(report, ReportStatus.COMPLETED, file_path=file_path)
         except Exception as e:
