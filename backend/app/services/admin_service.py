@@ -1,17 +1,18 @@
 """
 business logic for settings/flags/maintenance windows, report generation
-(synchronous CSV/PDF export), and merchant KYC verification.
+(synchronous CSV/PDF export + summary aggregation), and merchant KYC verification.
 """
 
 import csv
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from fastapi import HTTPException, status
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.repositories.admin_repository import AdminRepository
@@ -126,3 +127,38 @@ class AdminService:
 
     def list_reports(self):
         return self.repo.list_reports()
+
+    def get_payments_summary(self, days: int = 30) -> dict:
+        """
+        Platform-wide (not merchant-scoped) aggregation for the admin reports page's charts.
+        Sums amount_minor across all currencies with no FX conversion — a real multi-currency
+        platform would need to convert to a common currency before summing; this is a known
+        simplification worth flagging on the frontend rather than presenting as a real total.
+        """
+        cutoff = datetime.utcnow() - timedelta(days=days)
+
+        daily_rows = (
+            self.db.query(
+                func.date_trunc("day", PaymentIntent.created_at).label("day"),
+                func.sum(PaymentIntent.amount_minor).label("total"),
+                func.count(PaymentIntent.id).label("count"),
+            )
+            .filter(PaymentIntent.created_at >= cutoff)
+            .group_by("day")
+            .order_by("day")
+            .all()
+        )
+        daily_revenue = [
+            {"date": row.day.date().isoformat(), "amount_minor": int(row.total or 0), "count": row.count}
+            for row in daily_rows
+        ]
+
+        status_rows = (
+            self.db.query(PaymentIntent.status, func.count(PaymentIntent.id).label("count"))
+            .filter(PaymentIntent.created_at >= cutoff)
+            .group_by(PaymentIntent.status)
+            .all()
+        )
+        status_breakdown = [{"status": row.status.value, "count": row.count} for row in status_rows]
+
+        return {"daily_revenue": daily_revenue, "status_breakdown": status_breakdown}

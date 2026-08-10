@@ -24,6 +24,7 @@ from app.schemas.admin import (
     MerchantVerifyRequest,
     ReportGenerateRequest,
     ReportExportResponse,
+    ReportSummaryResponse,
 )
 from app.schemas.merchant import MerchantResponse
 from app.models.merchant import KycStatus
@@ -96,6 +97,12 @@ def generate_payments_report(
 def list_reports(admin: User = Depends(require_admin), db: Session = Depends(get_db)):
     service = AdminService(db)
     return service.list_reports()
+
+
+@router.get("/reports/summary", response_model=ReportSummaryResponse)
+def get_reports_summary(days: int = 30, admin: User = Depends(require_admin), db: Session = Depends(get_db)):
+    service = AdminService(db)
+    return service.get_payments_summary(days)
 
 
 @router.get("/reports/{report_id}/download")

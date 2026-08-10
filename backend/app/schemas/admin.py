@@ -68,6 +68,22 @@ class MerchantVerifyRequest(BaseModel):
     reason: str | None = None
 
 
+class DailyRevenuePoint(BaseModel):
+    date: str
+    amount_minor: int
+    count: int
+
+
+class StatusBreakdownPoint(BaseModel):
+    status: str
+    count: int
+
+
+class ReportSummaryResponse(BaseModel):
+    daily_revenue: list[DailyRevenuePoint]
+    status_breakdown: list[StatusBreakdownPoint]
+
+
 class ReportGenerateRequest(BaseModel):
     format: ReportFormat = ReportFormat.CSV
 
