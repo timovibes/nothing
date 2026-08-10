@@ -42,8 +42,22 @@ export function AdminReportsPage() {
     }
   }
 
-  function downloadUrl(reportId: string) {
-    return `${api.defaults.baseURL}/api/v1/admin/reports/${reportId}/download`;
+  async function handleDownload(reportId: string) {
+    try {
+      const response = await api.get(`/api/v1/admin/reports/${reportId}/download`, {
+        responseType: "blob",
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `report-${reportId}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setError(err.response?.data?.detail ?? "Failed to download report");
+    }
   }
 
   if (loading) return <p className="text-secondary text-sm">Loading…</p>;
@@ -92,12 +106,12 @@ export function AdminReportsPage() {
                 <div className="flex items-center gap-4">
                   <span className="text-xs text-secondary font-mono">{formatDate(report.created_at)}</span>
                   {report.status === "completed" && report.file_path && (
-                    
-                      <a href={downloadUrl(report.id)}
+                    <button
+                      onClick={() => handleDownload(report.id)}
                       className="text-xs uppercase tracking-wide px-2 py-1 rounded-neu-sm shadow-neu-raised-sm hover:shadow-neu-hover active:shadow-neu-inset-sm transition-shadow"
                     >
                       Download
-                    </a>
+                    </button>
                   )}
                 </div>
               </div>
