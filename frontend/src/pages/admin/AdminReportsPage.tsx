@@ -43,22 +43,23 @@ export function AdminReportsPage() {
   }
 
   async function handleDownload(reportId: string) {
-    try {
-      const response = await api.get(`/api/v1/admin/reports/${reportId}/download`, {
-        responseType: "blob",
-      });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `report-${reportId}.csv`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err: any) {
-      setError(err.response?.data?.detail ?? "Failed to download report");
-    }
-  }
+  const response = await api.get(`/api/v1/admin/reports/${reportId}/download`, {
+    responseType: "blob",
+  });
+
+  const disposition = response.headers["content-disposition"];
+  const match = disposition?.match(/filename="?([^"]+)"?/);
+  const filename = match?.[1] ?? `report-${reportId}.csv`; // fallback only if header is missing
+
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}
 
   if (loading) return <p className="text-secondary text-sm">Loading…</p>;
   if (error) return <p className="text-error text-sm">{error}</p>;
